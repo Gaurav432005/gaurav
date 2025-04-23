@@ -14,6 +14,11 @@ const messageInput = document.getElementById('messageInput');
 const sendMessageBtn = document.getElementById('sendMessage');
 const clearChatBtn = document.getElementById('clearChat');
 const videoChatContainer = document.getElementById('videoChatContainer');
+const createRoomBtn = document.getElementById('createRoom');
+const joinRoomBtn = document.getElementById('joinRoom');
+const roomIdInput = document.getElementById('roomIdInput');
+const displayRoomId = document.getElementById('displayRoomId');
+const copyRoomLinkBtn = document.getElementById('copyRoomLink');
 
 // App State
 let youtubePlayerInstance;
@@ -24,7 +29,9 @@ let partnerPeerId;
 let isCameraOn = false;
 let isMicOn = false;
 let isVideoChatVisible = false;
-let roomId = generateRoomId();
+let roomId = null;
+let isRoomOwner = false;
+let dataChannel;
 
 // Initialize YouTube Player
 function initYouTubePlayer() {
@@ -47,58 +54,77 @@ window.onYouTubeIframeAPIReady = function() {
 
 function onPlayerReady(event) {
     console.log('YouTube player ready');
-    // Sync initial state if available
-    syncVideoState();
+    if (roomId) {
+        syncVideoState();
+    }
 }
 
 function onPlayerStateChange(event) {
+    if (!roomId) return;
+    
     // Only sync if the change wasn't triggered by a remote update
     if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
         const currentTime = youtubePlayerInstance.getCurrentTime();
         database.ref(`rooms/${roomId}/playerState`).set({
             state: event.data,
             currentTime: currentTime,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+            sender: currentPeerId
         });
     }
 }
 
 // Initialize WebRTC with PeerJS
 async function initPeerJS() {
-    // Create a random peer ID
-    currentPeerId = 'peer-' + Math.random().toString(36).substr(2, 9);
-    peer = new Peer(currentPeerId);
-    
-    peer.on('open', (id) => {
-        console.log('PeerJS connected with ID:', id);
-        setupFirebasePresence();
-    });
-    
-    peer.on('call', (call) => {
-        call.answer(localStream);
-        call.on('stream', (remoteStream) => {
-            remoteVideo.srcObject = remoteStream;
-            partnerPeerId = call.peer;
-            updateConnectionStatus(true);
+    try {
+        // Create a random peer ID
+        currentPeerId = 'peer-' + Math.random().toString(36).substr(2, 9);
+        peer = new Peer(currentPeerId);
+        
+        peer.on('open', (id) => {
+            console.log('PeerJS connected with ID:', id);
+            if (roomId) {
+                setupFirebasePresence();
+            }
         });
-    });
-    
-    peer.on('error', (err) => {
-        console.error('PeerJS error:', err);
-        updateConnectionStatus(false);
-    });
+        
+        peer.on('call', (call) => {
+            call.answer(localStream);
+            call.on('stream', (remoteStream) => {
+                remoteVideo.srcObject = remoteStream;
+                partnerPeerId = call.peer;
+                updateConnectionStatus(true);
+            });
+            
+            // Set up data channel for chat
+            call.on('dataChannel', (channel) => {
+                setupDataChannel(channel);
+            });
+        });
+        
+        peer.on('error', (err) => {
+            console.error('PeerJS error:', err);
+            updateConnectionStatus(false);
+        });
+    } catch (err) {
+        console.error('PeerJS initialization error:', err);
+    }
 }
 
 // Initialize media devices
 async function initMediaDevices() {
     try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        localStream = await navigator.mediaDevices.getUserMedia({ 
+            video: true, 
+            audio: true 
+        });
         localVideo.srcObject = localStream;
         isCameraOn = true;
         isMicOn = true;
         updateMediaButtons();
     } catch (err) {
         console.error('Error accessing media devices:', err);
+        alert('Could not access camera/microphone. Please check permissions.');
     }
 }
 
@@ -139,6 +165,11 @@ function updateMediaButtons() {
 
 // Load YouTube video
 loadVideoBtn.addEventListener('click', () => {
+    if (!roomId) {
+        alert('Please create or join a room first');
+        return;
+    }
+    
     const url = youtubeUrlInput.value.trim();
     if (!url) return;
     
@@ -159,7 +190,10 @@ loadVideoBtn.addEventListener('click', () => {
         }
         
         // Save the current video to Firebase
-        database.ref(`rooms/${roomId}/currentVideo`).set(videoId);
+        database.ref(`rooms/${roomId}/currentVideo`).set({
+            videoId: videoId,
+            sender: currentPeerId
+        });
     } else {
         alert('Please enter a valid YouTube URL');
     }
@@ -223,15 +257,38 @@ function findPartnerAndCall() {
                 remoteVideo.srcObject = remoteStream;
                 updateConnectionStatus(true);
             });
+            
+            // Create data channel for chat
+            dataChannel = call.peerConnection.createDataChannel('chat');
+            setupDataChannel(dataChannel);
         }
     });
+}
+
+function setupDataChannel(channel) {
+    dataChannel = channel;
+    
+    dataChannel.onopen = () => {
+        console.log('Data channel opened');
+    };
+    
+    dataChannel.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        if (message.type === 'chat') {
+            addMessageToChat(message.content, false);
+        }
+    };
+    
+    dataChannel.onclose = () => {
+        console.log('Data channel closed');
+    };
 }
 
 // Sync YouTube video state
 function syncVideoState() {
     database.ref(`rooms/${roomId}/playerState`).on('value', (snapshot) => {
         const playerState = snapshot.val();
-        if (!playerState || !youtubePlayerInstance) return;
+        if (!playerState || !youtubePlayerInstance || playerState.sender === currentPeerId) return;
         
         const currentPlayerState = youtubePlayerInstance.getPlayerState();
         const currentTime = youtubePlayerInstance.getCurrentTime();
@@ -252,9 +309,11 @@ function syncVideoState() {
     
     // Sync current video
     database.ref(`rooms/${roomId}/currentVideo`).on('value', (snapshot) => {
-        const videoId = snapshot.val();
-        if (videoId && youtubePlayerInstance && youtubePlayerInstance.getVideoData().video_id !== videoId) {
-            youtubePlayerInstance.loadVideoById(videoId);
+        const videoData = snapshot.val();
+        if (!videoData || !youtubePlayerInstance || videoData.sender === currentPeerId) return;
+        
+        if (videoData.videoId && youtubePlayerInstance.getVideoData().video_id !== videoData.videoId) {
+            youtubePlayerInstance.loadVideoById(videoData.videoId);
         }
     });
 }
@@ -272,24 +331,112 @@ clearChatBtn.addEventListener('click', () => {
 function sendMessage() {
     const message = messageInput.value.trim();
     if (message) {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.textContent = `You: ${message}`;
-        chatMessages.appendChild(messageElement);
-        messageInput.value = '';
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        addMessageToChat(message, true);
         
-        // In a real app, you would send this to your partner via WebRTC data channel or Firebase
+        if (dataChannel && dataChannel.readyState === 'open') {
+            dataChannel.send(JSON.stringify({
+                type: 'chat',
+                content: message
+            }));
+        }
+        
+        messageInput.value = '';
     }
 }
 
-// Helper functions
+function addMessageToChat(message, isLocal) {
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    messageElement.textContent = `${isLocal ? 'You' : 'Partner'}: ${message}`;
+    chatMessages.appendChild(messageElement);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Room Management
+createRoomBtn.addEventListener('click', createNewRoom);
+joinRoomBtn.addEventListener('click', joinExistingRoom);
+copyRoomLinkBtn.addEventListener('click', copyRoomLink);
+
+function createNewRoom() {
+    roomId = generateRoomId();
+    isRoomOwner = true;
+    updateRoomUI();
+    initializeRoomConnection();
+}
+
+function joinExistingRoom() {
+    const inputRoomId = roomIdInput.value.trim();
+    if (!inputRoomId) {
+        alert('Please enter a room ID');
+        return;
+    }
+    
+    // Validate room ID format
+    if (!/^[a-z]+-[a-z]+-\d{3}$/.test(inputRoomId)) {
+        alert('Please enter a valid room ID in the format: word-word-123');
+        return;
+    }
+    
+    roomId = inputRoomId;
+    isRoomOwner = false;
+    updateRoomUI();
+    initializeRoomConnection();
+}
+
+function initializeRoomConnection() {
+    // Show video controls
+    document.querySelector('.video-container').style.display = 'block';
+    document.querySelector('.collaboration-panel').style.display = 'block';
+    
+    // Initialize media devices and sync
+    initMediaDevices();
+    syncVideoState();
+    
+    // Set up presence detection
+    if (peer && peer.id) {
+        setupFirebasePresence();
+    }
+}
+
+function updateRoomUI() {
+    displayRoomId.textContent = roomId;
+    roomIdInput.value = roomId;
+    statusText.textContent = isRoomOwner ? 'Room owner - ' + roomId : 'Joined - ' + roomId;
+}
+
+function copyRoomLink() {
+    if (!roomId) return;
+    
+    const roomLink = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+    navigator.clipboard.writeText(roomLink).then(() => {
+        alert('Room link copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy room link:', err);
+        // Fallback for browsers that don't support clipboard API
+        roomIdInput.select();
+        document.execCommand('copy');
+        alert('Room ID copied to clipboard!');
+    });
+}
+
 function generateRoomId() {
-    // For simplicity, we're using a random room ID
-    // In a real app, you might want to:
-    // 1. Generate a shareable link
-    // 2. Let users create/join rooms
-    return 'room-' + Math.random().toString(36).substr(2, 6);
+    const adjectives = ['happy', 'sunny', 'quick', 'bright', 'gentle', 'jolly', 'clever', 'brave'];
+    const nouns = ['study', 'learn', 'brain', 'book', 'desk', 'focus', 'mind', 'wisdom'];
+    const randomAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+    const randomNum = Math.floor(100 + Math.random() * 900); // 3-digit number
+    
+    return `${randomAdj}-${randomNoun}-${randomNum}`;
+}
+
+function checkUrlForRoomId() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('room');
+    
+    if (roomParam) {
+        roomIdInput.value = roomParam;
+        joinExistingRoom();
+    }
 }
 
 function updateConnectionStatus(connected, message) {
@@ -297,20 +444,21 @@ function updateConnectionStatus(connected, message) {
     statusText.textContent = connected ? 'Connected' : message || 'Disconnected';
 }
 
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    if (peer) {
+        peer.destroy();
+    }
+    if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+    }
+});
+
 // Initialize the app
 function initApp() {
     initYouTubePlayer();
     initPeerJS();
-    initMediaDevices();
-    
-    // Display room ID for sharing (in a real app, you'd have a proper sharing mechanism)
-    console.log('Room ID:', roomId);
-    // For demo purposes, we'll show it in the status
-    statusText.textContent = `Room: ${roomId}`;
-    
-    // Start listening for video state changes
-    syncVideoState();
+    checkUrlForRoomId();
 }
 
-// Start the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initApp);
