@@ -68,6 +68,55 @@ h1 {
 .status-dot.disconnected {
     background-color: var(--danger-color);
 }
+.room-connection {
+    background: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+}
+
+.room-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.room-actions input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    flex: 1;
+    min-width: 200px;
+}
+
+.room-actions button {
+    padding: 8px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+.room-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.small-btn {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+}
+
+#displayRoomId {
+    font-weight: 500;
+    color: var(--primary-color);
+}
 
 main {
     display: flex;
