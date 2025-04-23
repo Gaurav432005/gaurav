@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Sync Party</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4285f4;
+            --primary-dark: #3367d6;
+            --secondary: #34a853;
+            --danger: #ea4335;
+            --light: #f8f9fa;
+            --dark: #202124;
+            --gray: #5f6368;
+            --light-gray: #e8eaed;
+            --glass: rgba(255, 255, 255, 0.8);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+        
+        header {
+            padding: 16px 24px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+        
+        .status-dot.connected {
+            background: var(--secondary);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            
+            50% {
+                opacity: 0.5;
+            }
+            
+            100% {
+                opacity: 1;
+            }
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .video-section {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .video-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .video-input input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        .video-input input:focus {
+            border-color: var(--primary);
+        }
+        
+        .video-input button {
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .video-input button:hover {
+            background: var(--primary-dark);
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-controls {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--gray);
+            transition: color 0.3s;
+            padding: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            color: var(--primary);
+            background: rgba(66, 133, 244, 0.1);
+        }
+        
+        .control-btn.active {
+            color: var(--primary);
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .speed-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--gray);
+            transition: all 0.3s;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .speed-btn:hover,
+        .speed-btn.active {
+            color: var(--primary);
+            background: rgba(66, 133, 244, 0.1);
+        }
+        
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--light-gray);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 12px 20px;
+            background: white;
+            font-weight: 500;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: rgba(248, 249, 250, 0.7);
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            word-wrap: break-word;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .partner-message {
+            align-self: flex-start;
+            background: white;
+            border-top-left-radius: 4px;
+        }
+        
+        .my-message {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .message-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 0.7rem;
+        }
+        
+        .partner-message .message-info {
+            color: var(--gray);
+        }
+        
+        .my-message .message-info {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .message-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 0.7rem;
+        }
+        
+        .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        .typing-indicator {
+            align-self: flex-start;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+            display: none;
+        }
+        
+        .typing-indicator.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .chat-input-container {
+            padding: 12px;
+            background: white;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--light-gray);
+            border-radius: 20px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .send-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .video-controls {
+                flex-wrap: wrap;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">YouTube Sync Party</div>
+            <div class="connection-status">
+                <span id="status-text">Waiting for partner...</span>
+                <div class="status-dot" id="status-dot"></div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-input">
+                    <input type="text" id="video-url" placeholder="Paste YouTube URL here..." autocomplete="off">
+                    <button id="load-video">Load Video</button>
+                </div>
+                <div class="video-container" id="video-container">
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: white;">
+                        <p>Video will appear here</p>
+                    </div>
+                </div>
+                <div class="video-controls">
+                    <button class="control-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
+                    <button class="control-btn" id="backward-btn"><i class="fas fa-backward"></i></button>
+                    <button class="control-btn" id="forward-btn"><i class="fas fa-forward"></i></button>
+                    <div class="speed-control">
+                        <button class="speed-btn" data-speed="0.5">0.5x</button>
+                        <button class="speed-btn active" data-speed="1">1x</button>
+                        <button class="speed-btn" data-speed="1.5">1.5x</button>
+                        <button class="speed-btn" data-speed="2">2x</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-section">
+                <div class="chat-header">Chat</div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="typing-indicator" id="typing-indicator">
+                        Partner is typing...
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." autocomplete="off">
+                        <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <!-- YouTube IFrame API -->
+    <script>
+        // Load the YouTube IFrame API asynchronously
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    </script>
+    
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrlpqy8RY9jb9ZK_-Q9sjJDTSPp-rSHTI",
+            authDomain: "portfolio-website-2d969.firebaseapp.com",
+            projectId: "portfolio-website-2d969",
+            storageBucket: "portfolio-website-2d969.appspot.com",
+            messagingSenderId: "578469599468",
+            appId: "1:578469599468:web:6551387ea83cf8bc086dc9"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // App state
+        let player;
+        let currentVideoId = '';
+        let isLeader = false;
+        let partnerConnected = false;
+        let sessionId = generateSessionId();
+        let userId = generateUserId();
+        let partnerUserId = '';
+        let isTyping = false;
+        let typingTimeout;
+        
+        // DOM elements
+        const videoUrlInput = document.getElementById('video-url');
+        const loadVideoBtn = document.getElementById('load-video');
+        const videoContainer = document.getElementById('video-container');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const backwardBtn = document.getElementById('backward-btn');
+        const forwardBtn = document.getElementById('forward-btn');
+        const speedBtns = document.querySelectorAll('.speed-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const toast = document.getElementById('toast');
+        
+        // Initialize the app
+        initApp();
+        
+        function initApp() {
+            // Check URL for session ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlSessionId = urlParams.get('session');
+            
+            if (urlSessionId) {
+                sessionId = urlSessionId;
+                // Update URL without reload
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                // If no session ID in URL, create a shareable link
+                const shareUrl = `${window.location.origin}${window.location.pathname}?session=${sessionId}`;
+                showToast(`Share this link with your partner: ${shareUrl}`);
+            }
+            
+            // Set up Firebase listeners
+            setupFirebaseListeners();
+            
+            // Set up event listeners
+            loadVideoBtn.addEventListener('click', loadVideo);
+            videoUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loadVideo();
+            });
+            
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            backwardBtn.addEventListener('click', () => seekVideo(-10));
+            forwardBtn.addEventListener('click', () => seekVideo(10));
+            
+            speedBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const speed = parseFloat(btn.dataset.speed);
+                    changePlaybackSpeed(speed);
+                });
+            });
+            
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                    sendMessage();
+                }
+            });
+            
+            chatInput.addEventListener('input', handleTyping);
+            sendBtn.addEventListener('click', sendMessage);
+            
+            // Initialize YouTube player
+            initYouTubePlayer();
+        }
+        
+        function setupFirebaseListeners() {
+            // Listen for partner connection
+            const sessionRef = database.ref(`sessions/${sessionId}`);
+            
+            sessionRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
+                
+                // Check if there's a partner
+                const users = data.users || {};
+                const userKeys = Object.keys(users);
+                
+                if (userKeys.length === 2) {
+                    // We have a partner
+                    partnerUserId = userKeys.find(id => id !== userId);
+                    updateConnectionStatus(true);
+                    
+                    // Determine leader (first user is leader)
+                    isLeader = userKeys[0] === userId;
+                    
+                    // If not leader, sync with leader's video
+                    if (!isLeader && users[partnerUserId].videoId) {
+                        loadVideoById(users[partnerUserId].videoId);
+                    }
+                } else {
+                    updateConnectionStatus(false);
+                    partnerUserId = '';
+                }
+            });
+            
+            // Listen for video state changes from partner
+            sessionRef.child(`users/${partnerUserId}/videoState`).on('value', (snapshot) => {
+                if (!partnerConnected || !player || isLeader) return;
+                
+                const videoState = snapshot.val();
+                if (!videoState) return;
+                
+                // Sync video state with partner
+                syncVideoState(videoState);
+            });
+            
+            // Listen for messages
+            sessionRef.child('messages').on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                if (!message || message.userId === userId) return;
+                
+                displayMessage(message, false);
+                markMessageAsSeen(snapshot.key);
+            });
+            
+            // Listen for typing indicator
+            sessionRef.child(`users/${partnerUserId}/isTyping`).on('value', (snapshot) => {
+                const typing = snapshot.val();
+                typingIndicator.classList.toggle('active', typing === true);
+                
+                if (typing) {
+                    // Auto-scroll to show typing indicator
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            });
+        }
+        
+        function initYouTubePlayer() {
+            // This function will be called by the YouTube API when ready
+            window.onYouTubeIframeAPIReady = function() {
+                player = new YT.Player('video-container', {
+                    height: '100%',
+                    width: '100%',
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            };
+        }
+        
+        function onPlayerReady(event) {
+            // Player is ready, can add event listeners if needed
+        }
+        
+        function onPlayerStateChange(event) {
+            if (!partnerConnected || !isLeader) return;
+            
+            // Only sync these states if we're the leader
+            const state = event.data;
+            const currentTime = player.getCurrentTime();
+            const playbackRate = player.getPlaybackRate();
+            
+            updateVideoState({
+                state,
+                currentTime,
+                playbackRate,
+                videoId: currentVideoId
+            });
+        }
+        
+        function loadVideo() {
+            const url = videoUrlInput.value.trim();
+            if (!url) return;
+            
+            const videoId = extractVideoId(url);
+            if (!videoId) {
+                showToast('Invalid YouTube URL');
+                return;
+            }
+            
+            loadVideoById(videoId);
+        }
+        
+        function loadVideoById(videoId) {
+            if (!player) return;
+            
+            currentVideoId = videoId;
+            player.loadVideoById(videoId);
+            
+            // Update Firebase with current video
+            if (partnerConnected && isLeader) {
+                database.ref(`sessions/${sessionId}/users/${userId}/videoId`).set(videoId);
+            }
+            
+            showToast('Video loaded');
+        }
+        
+        function togglePlayPause() {
+            if (!player) return;
+            
+            const state = player.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        }
+        
+        function seekVideo(seconds) {
+            if (!player) return;
+            
+            const currentTime = player.getCurrentTime();
+            player.seekTo(currentTime + seconds, true);
+            
+            // If we're the leader, update the state
+            if (partnerConnected && isLeader) {
+                updateVideoState({
+                    state: player.getPlayerState(),
+                    currentTime: currentTime + seconds,
+                    playbackRate: player.getPlaybackRate(),
+                    videoId: currentVideoId
+                });
+            }
+        }
+        
+        function changePlaybackSpeed(speed) {
+            if (!player) return;
+            
+            player.setPlaybackRate(speed);
+            
+            // Update active button
+            speedBtns.forEach(btn => {
+                btn.classList.toggle('active', parseFloat(btn.dataset.speed) === speed);
+            });
+            
+            // If we're the leader, update the state
+            if (partnerConnected && isLeader) {
+                updateVideoState({
+                    state: player.getPlayerState(),
+                    currentTime: player.getCurrentTime(),
+                    playbackRate: speed,
+                    videoId: currentVideoId
+                });
+            }
+        }
+        
+        function syncVideoState(videoState) {
+            if (!player || !videoState) return;
+            
+            // Prevent infinite loop by ignoring our own updates
+            if (videoState.videoId !== currentVideoId) {
+                currentVideoId = videoState.videoId;
+                player.loadVideoById({
+                    videoId: videoState.videoId,
+                    startSeconds: videoState.currentTime
+                });
+            } else {
+                const currentTime = player.getCurrentTime();
+                const timeDiff = Math.abs(currentTime - videoState.currentTime);
+                
+                // Only seek if the difference is significant to avoid jitter
+                if (timeDiff > 1) {
+                    player.seekTo(videoState.currentTime, true);
+                }
+            }
+            
+            // Sync playback state
+            if (videoState.state === YT.PlayerState.PLAYING && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                player.playVideo();
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else if (videoState.state === YT.PlayerState.PAUSED && player.getPlayerState() !== YT.PlayerState.PAUSED) {
+                player.pauseVideo();
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+            
+            // Sync playback rate
+            const currentSpeed = player.getPlaybackRate();
+            if (Math.abs(currentSpeed - videoState.playbackRate) > 0.1) {
+                player.setPlaybackRate(videoState.playbackRate);
+                
+                // Update active button
+                speedBtns.forEach(btn => {
+                    btn.classList.toggle('active', parseFloat(btn.dataset.speed) === videoState.playbackRate);
+                });
+            }
+        }
+        
+        function updateVideoState(state) {
+            if (!partnerConnected || !isLeader) return;
+            
+            database.ref(`sessions/${sessionId}/users/${userId}/videoState`).set(state);
+        }
+        
+        function handleTyping() {
+            if (!partnerConnected) return;
+            
+            // Set typing status
+            if (!isTyping) {
+                isTyping = true;
+                database.ref(`sessions/${sessionId}/users/${userId}/isTyping`).set(true);
+            }
+            
+            // Reset typing status after a delay
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+                database.ref(`sessions/${sessionId}/users/${userId}/isTyping`).set(false);
+            }, 1000);
+        }
+        
+        function sendMessage() {
+            const messageText = chatInput.value.trim();
+            if (!messageText || !partnerConnected) return;
+            
+            const message = {
+                text: messageText,
+                userId: userId,
+                timestamp: Date.now(),
+                seen: false
+            };
+            
+            // Push message to Firebase
+            const newMessageRef = database.ref(`sessions/${sessionId}/messages`).push();
+            newMessageRef.set(message);
+            
+            // Display message locally
+            displayMessage({
+                ...message,
+                id: newMessageRef.key
+            }, true);
+            
+            // Clear input
+            chatInput.value = '';
+            
+            // Reset typing status
+            isTyping = false;
+            database.ref(`sessions/${sessionId}/users/${userId}/isTyping`).set(false);
+        }
+        
+        function displayMessage(message, isMyMessage) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${isMyMessage ? 'my-message' : 'partner-message'}`;
+            
+            const seenIcon = isMyMessage ?
+                `<i class="fas fa-check${message.seen ? '-double' : ''}"></i>` : '';
+            
+            const deleteBtn = isMyMessage ?
+                `<button class="delete-btn" data-message-id="${message.id}">
+                    <i class="fas fa-trash"></i>
+                </button>` : '';
+            
+            messageElement.innerHTML = `
+                <div>${message.text}</div>
+                <div class="message-info">
+                    <span>${formatTime(message.timestamp)}</span>
+                    <div class="message-actions">
+                        ${seenIcon}
+                        ${deleteBtn}
+                    </div>
+                </div>
+            `;
+            
+            chatMessages.appendChild(messageElement);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Add delete event listener if it's our message
+            if (isMyMessage) {
+                const deleteBtn = messageElement.querySelector('.delete-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', () => {
+                        deleteMessage(message.id);
+                    });
+                }
+            }
+        }
+        
+        function markMessageAsSeen(messageId) {
+            database.ref(`sessions/${sessionId}/messages/${messageId}/seen`).set(true);
+        }
+        
+        function deleteMessage(messageId) {
+            database.ref(`sessions/${sessionId}/messages/${messageId}`).remove();
+            
+            // Remove message from DOM
+            const messageElement = document.querySelector(`.delete-btn[data-message-id="${messageId}"]`)?.closest('.message');
+            if (messageElement) {
+                messageElement.remove();
+            }
+        }
+        
+        function updateConnectionStatus(connected) {
+            partnerConnected = connected;
+            
+            if (connected) {
+                statusText.textContent = 'Connected with partner';
+                statusDot.classList.add('connected');
+                showToast('Partner connected!');
+                
+                // Join the session
+                database.ref(`sessions/${sessionId}/users/${userId}`).set({
+                    connected: true,
+                    lastActive: Date.now()
+                });
+                
+                // Set up disconnect handler
+                window.addEventListener('beforeunload', handleDisconnect);
+            } else {
+                statusText.textContent = 'Waiting for partner...';
+                statusDot.classList.remove('connected');
+            }
+        }
+        
+        function handleDisconnect() {
+            // Remove user from session
+            database.ref(`sessions/${sessionId}/users/${userId}`).remove();
+        }
+        
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Helper functions
+        function extractVideoId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+        
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function generateSessionId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+        
+        function generateUserId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+    </script>
+</body>
+
+</html>
