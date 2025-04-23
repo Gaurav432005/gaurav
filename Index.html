@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YouTube Sync Party</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4285f4;
+            --primary-dark: #3367d6;
+            --secondary: #34a853;
+            --danger: #ea4335;
+            --light: #f8f9fa;
+            --dark: #202124;
+            --gray: #5f6368;
+            --light-gray: #e8eaed;
+            --glass: rgba(255, 255, 255, 0.8);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            color: var(--dark);
+            touch-action: manipulation;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 20px);
+        }
+        
+        header {
+            padding: 12px 16px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 70%;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            flex-shrink: 0;
+        }
+        
+        .status-dot.connected {
+            background: var(--secondary);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+            
+            50% {
+                opacity: 0.5;
+            }
+            
+            100% {
+                opacity: 1;
+            }
+        }
+        
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .video-section {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .video-input {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .video-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border 0.3s;
+            min-width: 0;
+        }
+        
+        .video-input input:focus {
+            border-color: var(--primary);
+        }
+        
+        .video-input button {
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+        
+        .video-input button:hover {
+            background: var(--primary-dark);
+        }
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 8px;
+            background: #000;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .video-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--gray);
+            transition: all 0.3s;
+            padding: 6px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .control-btn:hover {
+            color: var(--primary);
+            background: rgba(66, 133, 244, 0.1);
+        }
+        
+        .control-btn.active {
+            color: var(--primary);
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .speed-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--gray);
+            transition: all 0.3s;
+            padding: 4px 6px;
+            border-radius: 4px;
+        }
+        
+        .speed-btn:hover,
+        .speed-btn.active {
+            color: var(--primary);
+            background: rgba(66, 133, 244, 0.1);
+        }
+        
+        .chat-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-top: 1px solid var(--light-gray);
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 10px 16px;
+            background: white;
+            font-weight: 500;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(248, 249, 250, 0.7);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            word-wrap: break-word;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .partner-message {
+            align-self: flex-start;
+            background: white;
+            border-top-left-radius: 4px;
+        }
+        
+        .my-message {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border-top-right-radius: 4px;
+        }
+        
+        .message-text {
+            padding-right: 20px;
+        }
+        
+        .message-info {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            font-size: 0.7rem;
+        }
+        
+        .message.active .message-info {
+            display: flex;
+        }
+        
+        .partner-message .message-info {
+            color: var(--gray);
+        }
+        
+        .my-message .message-info {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .message-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        
+        .delete-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            font-size: 0.7rem;
+            padding: 2px;
+        }
+        
+        .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        .unread-divider {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+        
+        .unread-divider::before,
+        .unread-divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid var(--light-gray);
+            margin: 0 8px;
+        }
+        
+        .chat-input-container {
+            padding: 10px;
+            background: white;
+            border-top: 1px solid var(--light-gray);
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 8px 14px;
+            border: 1px solid var(--light-gray);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .send-btn:hover {
+            background: var(--primary-dark);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            max-width: 90%;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        .error-message {
+            color: var(--danger);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: none;
+            text-align: center;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            header {
+                padding: 10px 12px;
+            }
+            
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .connection-status {
+                font-size: 0.7rem;
+            }
+            
+            .video-section {
+                padding: 8px;
+            }
+            
+            .video-input input {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .video-input button {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .video-controls {
+                gap: 8px;
+                padding: 8px;
+            }
+            
+            .control-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
+            }
+            
+            .speed-btn {
+                font-size: 0.7rem;
+                padding: 3px 5px;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 6px 10px;
+            }
+            
+            .chat-header {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .chat-messages {
+                padding: 8px;
+            }
+            
+            .chat-input {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .send-btn {
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">YouTube Sync Party</div>
+            <div class="connection-status">
+                <span id="status-text">Waiting for partner...</span>
+                <div class="status-dot" id="status-dot"></div>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-input">
+                    <input type="text" id="video-url" placeholder="Paste YouTube URL..." autocomplete="off">
+                    <button id="load-video">Load</button>
+                </div>
+                <div class="error-message" id="video-error"></div>
+                <div class="video-container" id="video-container">
+                    <div id="youtube-player" style="display: flex; justify-content: center; align-items: center; height: 100%; color: white;">
+                        <p>Enter a YouTube URL above</p>
+                    </div>
+                </div>
+                <div class="video-controls">
+                    <button class="control-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
+                    <button class="control-btn" id="backward-btn"><i class="fas fa-backward"></i></button>
+                    <button class="control-btn" id="forward-btn"><i class="fas fa-forward"></i></button>
+                    <div class="speed-control">
+                        <button class="speed-btn" data-speed="0.5">0.5x</button>
+                        <button class="speed-btn active" data-speed="1">1x</button>
+                        <button class="speed-btn" data-speed="1.5">1.5x</button>
+                        <button class="speed-btn" data-speed="2">2x</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chat-section">
+                <div class="chat-header">Chat</div>
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will appear here -->
+                </div>
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Type a message..." autocomplete="off">
+                        <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <!-- YouTube IFrame API -->
+    <script>
+        // Load the YouTube IFrame API asynchronously
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    </script>
+    
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrlpqy8RY9jb9ZK_-Q9sjJDTSPp-rSHTI",
+            authDomain: "portfolio-website-2d969.firebaseapp.com",
+            projectId: "portfolio-website-2d969",
+            storageBucket: "portfolio-website-2d969.appspot.com",
+            messagingSenderId: "578469599468",
+            appId: "1:578469599468:web:6551387ea83cf8bc086dc9"
+        };
+        
+        // Firebase init
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        let player;
+        let currentVideoId = '';
+        let isLeader = false;
+        let partnerConnected = false;
+        let userId = generateUserId();
+        let partnerUserId = '';
+        let lastVideoState = null;
+        let lastMessageTime = 0;
+        let unreadMessages = false;
+        let playerReady = false;
+        let lastPartnerConnected = false;
+        
+        // DOM elements
+        const videoUrlInput = document.getElementById('video-url');
+        const loadVideoBtn = document.getElementById('load-video');
+        const videoError = document.getElementById('video-error');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const backwardBtn = document.getElementById('backward-btn');
+        const forwardBtn = document.getElementById('forward-btn');
+        const speedBtns = document.querySelectorAll('.speed-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const toast = document.getElementById('toast');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        
+        initApp();
+        
+        function initApp() {
+            showLoading();
+            
+            setupFirebaseListeners();
+            
+            loadVideoBtn.addEventListener('click', loadVideo);
+            videoUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loadVideo();
+            });
+            
+            playPauseBtn.addEventListener('click', togglePlayPause);
+            backwardBtn.addEventListener('click', () => seekVideo(-10));
+            forwardBtn.addEventListener('click', () => seekVideo(10));
+            
+            speedBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const speed = parseFloat(btn.dataset.speed);
+                    changePlaybackSpeed(speed);
+                });
+            });
+            
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && chatInput.value.trim() !== '') {
+                    sendMessage();
+                }
+            });
+            
+            sendBtn.addEventListener('click', sendMessage);
+            
+            initYouTubePlayer();
+            
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.message')) {
+                    const message = e.target.closest('.message');
+                    document.querySelectorAll('.message').forEach(m => {
+                        if (m !== message) m.classList.remove('active');
+                    });
+                    message.classList.toggle('active');
+                } else {
+                    document.querySelectorAll('.message').forEach(m => m.classList.remove('active'));
+                }
+            });
+            
+            setInterval(() => {
+                database.ref(`sessions/public-session/users/${userId}/lastActive`).set(Date.now());
+            }, 5000);
+            
+            setTimeout(hideLoading, 1000);
+        }
+        
+        function setupFirebaseListeners() {
+            const sessionRef = database.ref('sessions/public-session');
+            const userRef = sessionRef.child(`users/${userId}`);
+            
+            userRef.set({
+                connected: true,
+                lastActive: Date.now(),
+                name: `User-${userId.substring(0, 4)}`
+            });
+            
+            window.addEventListener('beforeunload', () => {
+                userRef.remove();
+            });
+            
+            sessionRef.child('users').on('value', (snapshot) => {
+                const users = snapshot.val() || {};
+                const now = Date.now();
+                const activeUsers = Object.entries(users).filter(([_, data]) => now - (data.lastActive || 0) < 15000);
+                const userKeys = activeUsers.map(([id]) => id);
+                
+                console.log('Current users:', users);
+                
+                if (userKeys.length >= 2 && userKeys.some(id => id !== userId)) {
+                    partnerUserId = userKeys.find(id => id !== userId);
+                    updateConnectionStatus(true);
+                    
+                    isLeader = userKeys[0] === userId;
+                    console.log(isLeader ? 'I am the leader' : 'I am the follower');
+                    
+                    if (!isLeader && users[partnerUserId]?.videoId) {
+                        loadVideoById(users[partnerUserId].videoId);
+                    }
+                } else {
+                    updateConnectionStatus(false);
+                    partnerUserId = '';
+                }
+            });
+            
+            sessionRef.child(`users/${partnerUserId}/videoState`).on('value', (snapshot) => {
+                if (!partnerConnected || !player || isLeader) return;
+                const videoState = snapshot.val();
+                if (!videoState) return;
+                syncVideoState(videoState);
+            });
+            
+            sessionRef.child('messages').on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                if (!message || message.userId === userId) return;
+                
+                if (message.timestamp > lastMessageTime + 30000) {
+                    addUnreadDivider();
+                }
+                
+                displayMessage(message, false);
+                lastMessageTime = message.timestamp;
+                
+                if (isNearBottom()) {
+                    scrollToBottom();
+                } else {
+                    unreadMessages = true;
+                }
+            });
+        }
+        
+        function updateConnectionStatus(connected) {
+            if (connected === lastPartnerConnected) return;
+            lastPartnerConnected = connected;
+            
+            partnerConnected = connected;
+            if (connected) {
+                statusText.textContent = 'Connected with partner';
+                statusDot.classList.add('connected');
+                showToast('Partner connected!');
+            } else {
+                statusText.textContent = 'Waiting for partner...';
+                statusDot.classList.remove('connected');
+            }
+        }
+        
+        function initYouTubePlayer() {
+            window.onYouTubeIframeAPIReady = function() {
+                player = new YT.Player('youtube-player', {
+                    height: '100%',
+                    width: '100%',
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    },
+                    playerVars: {
+                        'playsinline': 1,
+                        'enablejsapi': 1,
+                        'origin': window.location.origin
+                    }
+                });
+            };
+        }
+        
+        function onPlayerReady() {
+            playerReady = true;
+            showToast('Player ready');
+            updatePlayPauseButton(YT.PlayerState.PAUSED);
+        }
+        
+        function onPlayerStateChange(event) {
+            if (!partnerConnected || !isLeader || !player) return;
+            const state = event.data;
+            const currentTime = player.getCurrentTime();
+            const playbackRate = player.getPlaybackRate();
+            
+            updatePlayPauseButton(state);
+            
+            const newState = { state, currentTime, playbackRate, videoId: currentVideoId };
+            if (!statesEqual(lastVideoState, newState)) {
+                lastVideoState = newState;
+                updateVideoState(newState);
+            }
+        }
+        
+        function statesEqual(a, b) {
+            return a && b &&
+                a.state === b.state &&
+                Math.abs(a.currentTime - b.currentTime) < 0.5 &&
+                a.playbackRate === b.playbackRate &&
+                a.videoId === b.videoId;
+        }
+        
+        function updatePlayPauseButton(state) {
+            playPauseBtn.innerHTML = state === YT.PlayerState.PLAYING ?
+                '<i class="fas fa-pause"></i>' :
+                '<i class="fas fa-play"></i>';
+        }
+        
+        function loadVideo() {
+            const url = videoUrlInput.value.trim();
+            if (!url) return showError('Please enter a YouTube URL');
+            
+            const videoId = extractVideoId(url);
+            if (!videoId) return showError('Invalid YouTube URL');
+            
+            loadVideoById(videoId);
+        }
+        
+        function loadVideoById(videoId) {
+            if (!playerReady) return showError('Player not ready yet');
+            
+            try {
+                showLoading();
+                clearError();
+                currentVideoId = videoId;
+                player.loadVideoById(videoId);
+                
+                if (partnerConnected) {
+                    database.ref(`sessions/public-session/users/${userId}/videoId`).set(videoId);
+                }
+                
+                showToast('Video loaded');
+            } catch (e) {
+                showError('Error loading video');
+                console.error(e);
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function togglePlayPause() {
+            if (!playerReady) return showError('Player not ready yet');
+            
+            const state = player.getPlayerState();
+            if (state === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
+        }
+        
+        function seekVideo(seconds) {
+            if (!playerReady) return;
+            
+            const newTime = Math.max(0, player.getCurrentTime() + seconds);
+            player.seekTo(newTime, true);
+            
+            if (partnerConnected && isLeader) {
+                updateVideoState({
+                    state: player.getPlayerState(),
+                    currentTime: newTime,
+                    playbackRate: player.getPlaybackRate(),
+                    videoId: currentVideoId
+                });
+            }
+        }
+        
+        function changePlaybackSpeed(speed) {
+            if (!playerReady) return;
+            
+            player.setPlaybackRate(speed);
+            speedBtns.forEach(btn => btn.classList.toggle('active', parseFloat(btn.dataset.speed) === speed));
+            
+            if (partnerConnected && isLeader) {
+                updateVideoState({
+                    state: player.getPlayerState(),
+                    currentTime: player.getCurrentTime(),
+                    playbackRate: speed,
+                    videoId: currentVideoId
+                });
+            }
+        }
+        
+        function syncVideoState(state) {
+            if (!playerReady || !state) return;
+            
+            if (state.videoId !== currentVideoId) {
+                currentVideoId = state.videoId;
+                player.loadVideoById({ videoId: state.videoId, startSeconds: state.currentTime || 0 });
+            } else if (Math.abs(player.getCurrentTime() - state.currentTime) > 1) {
+                player.seekTo(state.currentTime, true);
+            }
+            
+            if (state.state === YT.PlayerState.PLAYING && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                player.playVideo();
+            } else if (state.state === YT.PlayerState.PAUSED && player.getPlayerState() !== YT.PlayerState.PAUSED) {
+                player.pauseVideo();
+            }
+            
+            if (Math.abs(player.getPlaybackRate() - state.playbackRate) > 0.1) {
+                player.setPlaybackRate(state.playbackRate);
+                speedBtns.forEach(btn => btn.classList.toggle('active', parseFloat(btn.dataset.speed) === state.playbackRate));
+            }
+        }
+        
+        function updateVideoState(state) {
+            if (!partnerConnected) return;
+            database.ref(`sessions/public-session/users/${userId}/videoState`).set(state);
+        }
+        
+        function sendMessage() {
+            const messageText = chatInput.value.trim();
+            if (!messageText) return;
+            
+            const sessionId = 'public-session';
+            const message = {
+                text: messageText,
+                userId,
+                timestamp: Date.now()
+            };
+            
+            const newMessageRef = database.ref(`sessions/${sessionId}/messages`).push();
+            newMessageRef.set(message);
+            
+            displayMessage({ ...message, id: newMessageRef.key }, true);
+            chatInput.value = '';
+            scrollToBottom();
+            lastMessageTime = message.timestamp;
+        }
+        
+        function displayMessage(message, isMyMessage) {
+            const msgEl = document.createElement('div');
+            msgEl.className = `message ${isMyMessage ? 'my-message' : 'partner-message'}`;
+            
+            msgEl.innerHTML = `
+        <div class="message-text">${message.text}</div>
+        <div class="message-info">
+            <span>${formatTime(message.timestamp)}</span>
+            <div class="message-actions">
+                ${isMyMessage ? `<button class="delete-btn" data-message-id="${message.id}"><i class="fas fa-trash"></i></button>` : ''}
+            </div>
+        </div>
+    `;
+            
+            if (isMyMessage) {
+                msgEl.querySelector('.delete-btn')?.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteMessage(message.id);
+                });
+            }
+            
+            chatMessages.appendChild(msgEl);
+        }
+        
+        function addUnreadDivider() {
+            const divider = document.createElement('div');
+            divider.className = 'unread-divider';
+            divider.textContent = 'New messages';
+            chatMessages.appendChild(divider);
+            unreadMessages = false;
+        }
+        
+        function deleteMessage(id) {
+            database.ref(`sessions/public-session/messages/${id}`).remove();
+            document.querySelector(`.delete-btn[data-message-id="${id}"]`)?.closest('.message')?.remove();
+        }
+        
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            const divider = chatMessages.querySelector('.unread-divider');
+            if (divider) divider.remove();
+        }
+        
+        function isNearBottom() {
+            return chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight < 100;
+        }
+        
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        
+        function showError(msg) {
+            videoError.textContent = msg;
+            videoError.classList.add('show');
+        }
+        
+        function clearError() {
+            videoError.classList.remove('show');
+        }
+        
+        function showLoading() {
+            loadingOverlay.classList.add('active');
+        }
+        
+        function hideLoading() {
+            loadingOverlay.classList.remove('active');
+        }
+        
+        function extractVideoId(url) {
+            const regExp = /^.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]{11}).*/;
+            const match = url.match(regExp);
+            return match ? match[1] : null;
+        }
+        
+        function formatTime(timestamp) {
+            return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function generateUserId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+    </script>
+</body>
+
+</html>
