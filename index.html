@@ -4,156 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Sync</title>
+    <!-- Poppins Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             color: #333;
         }
         .container {
             max-width: 1000px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
         h1 {
             text-align: center;
             color: #ff0000;
+            margin-bottom: 5px;
+            font-weight: 600;
         }
-        .input-group {
-            display: flex;
+        .subtitle {
+            text-align: center;
+            color: #666;
             margin-bottom: 20px;
-        }
-        input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px 0 0 4px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #cc0000;
+            font-size: 14px;
         }
         #player {
             width: 100%;
             aspect-ratio: 16/9;
             margin-bottom: 20px;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
         }
         .controls {
             display: flex;
-            gap: 10px;
+            justify-content: center;
+            gap: 15px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
         }
         .controls button {
-            border-radius: 4px;
-            flex: 1;
-            min-width: 120px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .controls button:hover {
+            background-color: #e60000;
+            transform: scale(1.05);
         }
         .status {
             margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #e8f5e9;
-            display: none;
-        }
-        .error {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 4px;
-            background-color: #ffebee;
-            color: #c62828;
-            display: none;
-        }
-        .loading {
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f0f7ff;
+            color: #0066cc;
             text-align: center;
-            padding: 20px;
-            display: none;
+            font-size: 14px;
         }
-        .loading-spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff0000;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .user-info {
+        .connection-info {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 4px;
+            margin-bottom: 20px;
+            padding: 12px 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            font-size: 14px;
         }
         .connection-status {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
         .connection-dot {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            background-color: #ccc;
-        }
-        .connection-dot.active {
             background-color: #4CAF50;
         }
         #participantCount {
-            font-weight: bold;
+            font-weight: 500;
+        }
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 25px;
+            cursor: pointer;
+        }
+        #progressBar {
+            height: 100%;
+            background-color: #ff0000;
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        .url-input {
+            display: flex;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .url-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .url-input input:focus {
+            outline: none;
+        }
+        .url-input button {
+            padding: 0 20px;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+        .url-input button:hover {
+            background-color: #e60000;
+        }
+        .error {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #ffebee;
+            color: #c62828;
+            display: none;
+            font-size: 14px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>YouTube Sync</h1>
+        <div class="subtitle">Watch videos in sync with friends</div>
         
-        <div class="user-info">
-            <div>Status: <span id="userRole">Not connected</span></div>
+        <div class="connection-info">
             <div class="connection-status">
-                <div class="connection-dot" id="connectionDot"></div>
-                <span id="participantCount">0 users connected</span>
+                <div class="connection-dot"></div>
+                <span id="participantCount">1 user connected</span>
             </div>
         </div>
         
-        <div class="input-group">
-            <input type="text" id="videoUrlInput" placeholder="Enter YouTube URL to become leader">
-            <button id="loadVideoBtn">Load Video</button>
+        <div class="url-input">
+            <input type="text" id="videoUrlInput" placeholder="Paste YouTube URL here">
+            <button id="loadVideoBtn">Load</button>
         </div>
+        <div class="error" id="errorMessage"></div>
         
         <div id="player"></div>
         
-        <div class="controls">
-            <button id="playBtn">Play</button>
-            <button id="pauseBtn">Pause</button>
-            <button id="fullscreenBtn">Fullscreen</button>
+        <div class="time-display">
+            <span id="currentTime">0:00</span>
+            <span id="duration">0:00</span>
         </div>
         
-        <div class="status" id="statusMessage"></div>
-        <div class="error" id="errorMessage"></div>
+        <div class="progress-container" id="progressContainer">
+            <div id="progressBar"></div>
+        </div>
         
-        <div class="loading" id="loadingIndicator">
-            <div class="loading-spinner"></div>
-            <p>Loading...</p>
+        <div class="controls">
+            <button id="playPauseBtn"><i class="fas fa-play"></i></button>
+        </div>
+        
+        <div class="status" id="statusMessage">
+            Paste a YouTube URL above to start watching with others
         </div>
     </div>
 
@@ -161,7 +206,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     
-    <!-- YouTube IFrame API -->
     <script>
         // Firebase configuration - REPLACE WITH YOUR OWN
         const firebaseConfig = {
@@ -180,24 +224,25 @@
         // DOM elements
         const videoUrlInput = document.getElementById('videoUrlInput');
         const loadVideoBtn = document.getElementById('loadVideoBtn');
-        const playBtn = document.getElementById('playBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playPauseIcon = playPauseBtn.querySelector('i');
         const statusMessage = document.getElementById('statusMessage');
-        const errorMessage = document.getElementById('errorMessage');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const userRoleSpan = document.getElementById('userRole');
-        const connectionDot = document.getElementById('connectionDot');
         const participantCountSpan = document.getElementById('participantCount');
+        const currentTimeSpan = document.getElementById('currentTime');
+        const durationSpan = document.getElementById('duration');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const errorMessage = document.getElementById('errorMessage');
         
         // Global variables
-        const appId = 'youtube-sync-v2';
+        const appId = 'youtube-sync-v5';
         let player;
-        let isLeader = false;
-        let lastSyncedTime = 0;
-        let ignoreNextStateChange = false;
         let userId = generateUserId();
         let participantCount = 0;
+        let ignoreNextStateChange = false;
+        let updateInterval;
+        let currentVideoId = '';
+        let isPlaying = false;
         
         // Generate a unique user ID
         function generateUserId() {
@@ -211,16 +256,40 @@
             const videoId = urlParams.get('v');
             
             if (videoId) {
-                // Join existing session
                 videoUrlInput.value = `https://youtu.be/${videoId}`;
-                loadVideo(videoId, false);
-            } else {
-                // Show input for new leader
-                showStatus('Enter a YouTube URL to become the leader');
+                loadVideo(videoId);
             }
             
             // Set up presence detection
             setupPresenceDetection();
+            
+            // Set up button event listeners
+            setupControls();
+            
+            // Set up URL input listener
+            loadVideoBtn.addEventListener('click', handleNewVideo);
+            videoUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleNewVideo();
+            });
+        }
+        
+        // Handle new video URL input
+        function handleNewVideo() {
+            const videoUrl = videoUrlInput.value.trim();
+            if (!videoUrl) {
+                showError('Please enter a YouTube URL');
+                return;
+            }
+            
+            const videoId = extractVideoId(videoUrl);
+            if (!videoId) {
+                showError('Invalid YouTube URL');
+                return;
+            }
+            
+            // Update URL to shareable link
+            window.history.pushState(null, null, `?v=${videoId}`);
+            loadVideo(videoId);
         }
         
         // Set up presence detection to track connected users
@@ -236,108 +305,66 @@
             presenceRef.on('value', (snapshot) => {
                 participantCount = snapshot.numChildren();
                 participantCountSpan.textContent = `${participantCount} user${participantCount !== 1 ? 's' : ''} connected`;
-                
-                // Update connection dot
-                if (participantCount > 0) {
-                    connectionDot.classList.add('active');
-                } else {
-                    connectionDot.classList.remove('active');
+            });
+        }
+        
+        // Set up control button handlers
+        function setupControls() {
+            playPauseBtn.addEventListener('click', () => {
+                if (player) {
+                    if (isPlaying) {
+                        player.pauseVideo();
+                    } else {
+                        player.playVideo();
+                    }
+                    updateSyncState(!isPlaying);
+                }
+            });
+            
+            progressContainer.addEventListener('click', (e) => {
+                if (player) {
+                    const percent = e.offsetX / progressContainer.offsetWidth;
+                    const newTime = percent * player.getDuration();
+                    player.seekTo(newTime, true);
+                    updateSyncState(isPlaying);
                 }
             });
         }
         
-        // Load video button click handler
-        loadVideoBtn.addEventListener('click', () => {
-            const videoUrl = videoUrlInput.value.trim();
-            if (!videoUrl) {
-                showError('Please enter a YouTube URL');
-                return;
-            }
-            
-            const videoId = extractVideoId(videoUrl);
-            if (!videoId) {
-                showError('Invalid YouTube URL');
-                return;
-            }
-            
-            // Update URL to shareable link
-            window.history.pushState(null, null, `?v=${videoId}`);
-            loadVideo(videoId, true);
-        });
-        
-        // Control buttons click handlers
-        playBtn.addEventListener('click', () => {
-            if (player) {
-                player.playVideo();
-                if (isLeader) {
-                    updateLeaderState(true);
-                }
-            }
-        });
-        
-        pauseBtn.addEventListener('click', () => {
-            if (player) {
-                player.pauseVideo();
-                if (isLeader) {
-                    updateLeaderState(false);
-                }
-            }
-        });
-        
-        fullscreenBtn.addEventListener('click', () => {
-            if (player) {
-                const iframe = document.querySelector('#player iframe');
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else if (iframe.webkitRequestFullscreen) {
-                    iframe.webkitRequestFullscreen();
-                } else if (iframe.msRequestFullscreen) {
-                    iframe.msRequestFullscreen();
-                }
-            }
-        });
-        
-        // Update leader state in Firebase
-        function updateLeaderState(isPlaying) {
+        // Update sync state in Firebase
+        function updateSyncState(playing) {
             if (!player) return;
+            
+            isPlaying = playing;
+            updatePlayPauseIcon();
             
             database.ref(`${appId}/state`).update({
                 isPlaying: isPlaying,
                 currentTime: player.getCurrentTime(),
-                playbackRate: player.getPlaybackRate(),
-                lastActionTime: Date.now()
+                videoId: currentVideoId,
+                lastUpdated: Date.now(),
+                updatedBy: userId
             });
         }
         
-        // Load a YouTube video
-        function loadVideo(videoId, isLeaderAction) {
-            showLoading();
-            
-            if (isLeaderAction) {
-                // Become the leader
-                isLeader = true;
-                userRoleSpan.textContent = 'Leader';
-                
-                // Initialize state
-                database.ref(`${appId}`).set({
-                    videoId: videoId,
-                    state: {
-                        isPlaying: false,
-                        currentTime: 0,
-                        playbackRate: 1,
-                        lastActionTime: Date.now()
-                    }
-                });
-                
-                showStatus('You are now the leader. Share this page URL with others.');
+        // Update play/pause icon
+        function updatePlayPauseIcon() {
+            if (isPlaying) {
+                playPauseIcon.classList.remove('fa-play');
+                playPauseIcon.classList.add('fa-pause');
             } else {
-                // Join as participant
-                isLeader = false;
-                userRoleSpan.textContent = 'Participant';
-                showStatus('Connected to leader. Video will sync automatically.');
+                playPauseIcon.classList.remove('fa-pause');
+                playPauseIcon.classList.add('fa-play');
             }
+        }
+        
+        // Load a YouTube video
+        function loadVideo(videoId) {
+            currentVideoId = videoId;
+            statusMessage.textContent = `Loading video...`;
+            hideError();
             
-            // Load YouTube player
+            // First check if we need to load the YouTube API
             if (!window.YT) {
                 // Load YouTube IFrame API if not already loaded
                 const tag = document.createElement('script');
@@ -348,7 +375,15 @@
                 window.onYouTubeIframeAPIReady = function() {
                     createPlayer(videoId);
                 };
+            } else if (player) {
+                // If player already exists, just change the video
+                player.loadVideoById(videoId);
+                player.playVideo();
+                isPlaying = true;
+                updatePlayPauseIcon();
+                updateSyncState(true);
             } else {
+                // Create new player
                 createPlayer(videoId);
             }
             
@@ -363,8 +398,8 @@
                 width: '100%',
                 videoId: videoId,
                 playerVars: {
-                    'autoplay': 0,
-                    'controls': 1,
+                    'autoplay': 1,
+                    'controls': 0,
                     'rel': 0,
                     'enablejsapi': 1
                 },
@@ -384,70 +419,78 @@
                     return;
                 }
                 
-                // Only followers should react to state changes
-                if (!isLeader) {
-                    // Check if this is a fresh update (not stale)
-                    if (state.lastActionTime > lastSyncedTime) {
-                        lastSyncedTime = state.lastActionTime;
-                        
-                        // Apply state changes
-                        player.seekTo(state.currentTime, true);
-                        player.setPlaybackRate(state.playbackRate);
-                        
-                        if (state.isPlaying) {
-                            player.playVideo();
-                        } else {
-                            player.pauseVideo();
-                        }
-                    }
+                // If video changed, load the new video
+                if (state.videoId && state.videoId !== currentVideoId) {
+                    currentVideoId = state.videoId;
+                    window.history.pushState(null, null, `?v=${currentVideoId}`);
+                    videoUrlInput.value = `https://youtu.be/${currentVideoId}`;
+                    player.loadVideoById(currentVideoId);
                 }
+                
+                // Apply state changes
+                ignoreNextStateChange = true;
+                player.seekTo(state.currentTime, true);
+                
+                if (state.isPlaying) {
+                    player.playVideo();
+                    isPlaying = true;
+                } else {
+                    player.pauseVideo();
+                    isPlaying = false;
+                }
+                
+                updatePlayPauseIcon();
+                
+                // Small delay to prevent feedback loop
+                setTimeout(() => {
+                    ignoreNextStateChange = false;
+                }, 100);
             });
         }
         
         // Player ready handler
         function onPlayerReady(event) {
-            hideLoading();
+            statusMessage.textContent = `Now playing. Share this URL to sync with others.`;
             
-            if (!isLeader) {
-                // Sync immediately when joining
-                syncVideo();
-            }
+            // Start updating time display
+            clearInterval(updateInterval);
+            updateInterval = setInterval(updateTimeDisplay, 1000);
+            
+            // Initialize sync state
+            isPlaying = true;
+            updatePlayPauseIcon();
+            updateSyncState(true);
         }
         
         // Player state change handler
         function onPlayerStateChange(event) {
-            // Only leader broadcasts state changes
-            if (isLeader && player && event.data !== -1) { // -1 is unstarted
-                updateLeaderState(event.data === YT.PlayerState.PLAYING);
+            // Update sync state when playback state changes
+            if (event.data === YT.PlayerState.PLAYING || event.data === YT.PlayerState.PAUSED) {
+                isPlaying = event.data === YT.PlayerState.PLAYING;
+                updatePlayPauseIcon();
+                updateSyncState(isPlaying);
             }
         }
         
-        // Sync video with leader's state
-        function syncVideo() {
-            if (!isLeader && player) {
-                showLoading();
-                ignoreNextStateChange = true;
+        // Update time display and progress bar
+        function updateTimeDisplay() {
+            if (player && player.getDuration) {
+                const currentTime = player.getCurrentTime();
+                const duration = player.getDuration();
                 
-                database.ref(`${appId}/state`).once('value').then((snapshot) => {
-                    const state = snapshot.val();
-                    if (state) {
-                        player.seekTo(state.currentTime, true);
-                        player.setPlaybackRate(state.playbackRate);
-                        
-                        if (state.isPlaying) {
-                            player.playVideo();
-                        } else {
-                            player.pauseVideo();
-                        }
-                        
-                        lastSyncedTime = state.lastActionTime;
-                        hideLoading();
-                    }
-                }).catch((error) => {
-                    hideLoading();
-                    showError('Sync failed: ' + error.message);
-                });
+                currentTimeSpan.textContent = formatTime(currentTime);
+                durationSpan.textContent = formatTime(duration);
+                
+                const progressPercent = (currentTime / duration) * 100;
+                progressBar.style.width = progressPercent + '%';
             }
+        }
+        
+        // Format seconds as M:SS
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
         
         // Extract YouTube video ID from URL
@@ -457,28 +500,15 @@
             return (match && match[2].length === 11) ? match[2] : null;
         }
         
-        // UI helper functions
-        function showStatus(message) {
-            statusMessage.textContent = message;
-            statusMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 3000);
-        }
-        
+        // Show error message
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
-            statusMessage.style.display = 'none';
         }
         
-        function showLoading() {
-            loadingIndicator.style.display = 'block';
-        }
-        
-        function hideLoading() {
-            loadingIndicator.style.display = 'none';
+        // Hide error message
+        function hideError() {
+            errorMessage.style.display = 'none';
         }
         
         // Initialize the app when page loads
