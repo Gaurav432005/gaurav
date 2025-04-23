@@ -63,15 +63,6 @@
             flex: 1;
             min-width: 120px;
         }
-        .room-info {
-            background-color: #f0f0f0;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
         .status {
             margin-top: 20px;
             padding: 10px;
@@ -105,41 +96,60 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .connection-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ccc;
+        }
+        .connection-dot.active {
+            background-color: #4CAF50;
+        }
+        #participantCount {
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>YouTube Sync</h1>
         
-        <div id="setup">
-            <div class="input-group">
-                <input type="text" id="roomIdInput" placeholder="Enter room ID or leave empty to create new room">
-                <button id="joinRoomBtn">Join Room</button>
+        <div class="user-info">
+            <div>Status: <span id="userRole">Not connected</span></div>
+            <div class="connection-status">
+                <div class="connection-dot" id="connectionDot"></div>
+                <span id="participantCount">0 users connected</span>
             </div>
         </div>
         
-        <div id="room" style="display: none;">
-            <div class="room-info">
-                <div>Room ID: <strong id="currentRoomId"></strong></div>
-                <button id="copyRoomIdBtn">Copy Room Link</button>
-            </div>
-            
-            <div class="input-group">
-                <input type="text" id="videoUrlInput" placeholder="Enter YouTube URL">
-                <button id="loadVideoBtn">Load Video</button>
-            </div>
-            
-            <div id="player"></div>
-            
-            <div class="controls">
-                <button id="playBtn">Play</button>
-                <button id="pauseBtn">Pause</button>
-                <button id="syncBtn">Sync Now</button>
-            </div>
-            
-            <div class="status" id="statusMessage"></div>
-            <div class="error" id="errorMessage"></div>
+        <div class="input-group">
+            <input type="text" id="videoUrlInput" placeholder="Enter YouTube URL to become leader">
+            <button id="loadVideoBtn">Load Video</button>
         </div>
+        
+        <div id="player"></div>
+        
+        <div class="controls">
+            <button id="playBtn">Play</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="fullscreenBtn">Fullscreen</button>
+        </div>
+        
+        <div class="status" id="statusMessage"></div>
+        <div class="error" id="errorMessage"></div>
         
         <div class="loading" id="loadingIndicator">
             <div class="loading-spinner"></div>
@@ -153,7 +163,7 @@
     
     <!-- YouTube IFrame API -->
     <script>
-        // Firebase configuration
+        // Firebase configuration - REPLACE WITH YOUR OWN
         const firebaseConfig = {
       apiKey: "AIzaSyBrlpqy8RY9jb9ZK_-Q9sjJDTSPp-rSHTI",
       authDomain: "portfolio-website-2d969.firebaseapp.com",
@@ -168,41 +178,73 @@
         const database = firebase.database();
         
         // DOM elements
-        const setupDiv = document.getElementById('setup');
-        const roomDiv = document.getElementById('room');
-        const roomIdInput = document.getElementById('roomIdInput');
-        const joinRoomBtn = document.getElementById('joinRoomBtn');
-        const currentRoomIdSpan = document.getElementById('currentRoomId');
-        const copyRoomIdBtn = document.getElementById('copyRoomIdBtn');
         const videoUrlInput = document.getElementById('videoUrlInput');
         const loadVideoBtn = document.getElementById('loadVideoBtn');
         const playBtn = document.getElementById('playBtn');
         const pauseBtn = document.getElementById('pauseBtn');
-        const syncBtn = document.getElementById('syncBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
         const statusMessage = document.getElementById('statusMessage');
         const errorMessage = document.getElementById('errorMessage');
         const loadingIndicator = document.getElementById('loadingIndicator');
+        const userRoleSpan = document.getElementById('userRole');
+        const connectionDot = document.getElementById('connectionDot');
+        const participantCountSpan = document.getElementById('participantCount');
         
         // Global variables
-        let currentRoomId = '';
+        const appId = 'youtube-sync-v2';
         let player;
         let isLeader = false;
         let lastSyncedTime = 0;
         let ignoreNextStateChange = false;
+        let userId = generateUserId();
+        let participantCount = 0;
         
-        // Join room button click handler
-        joinRoomBtn.addEventListener('click', () => {
-            const roomId = roomIdInput.value.trim();
-            joinRoom(roomId || generateRoomId());
-        });
+        // Generate a unique user ID
+        function generateUserId() {
+            return 'user-' + Math.random().toString(36).substr(2, 9);
+        }
         
-        // Copy room link button click handler
-        copyRoomIdBtn.addEventListener('click', () => {
-            const roomLink = window.location.href.split('?')[0] + '?room=' + currentRoomId;
-            navigator.clipboard.writeText(roomLink).then(() => {
-                showStatus('Room link copied to clipboard!');
+        // Initialize the app
+        function initApp() {
+            // Check URL for video parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('v');
+            
+            if (videoId) {
+                // Join existing session
+                videoUrlInput.value = `https://youtu.be/${videoId}`;
+                loadVideo(videoId, false);
+            } else {
+                // Show input for new leader
+                showStatus('Enter a YouTube URL to become the leader');
+            }
+            
+            // Set up presence detection
+            setupPresenceDetection();
+        }
+        
+        // Set up presence detection to track connected users
+        function setupPresenceDetection() {
+            const presenceRef = database.ref(`presence/${appId}`);
+            
+            // Update user's presence
+            const userRef = presenceRef.child(userId);
+            userRef.set(true);
+            userRef.onDisconnect().remove();
+            
+            // Count participants
+            presenceRef.on('value', (snapshot) => {
+                participantCount = snapshot.numChildren();
+                participantCountSpan.textContent = `${participantCount} user${participantCount !== 1 ? 's' : ''} connected`;
+                
+                // Update connection dot
+                if (participantCount > 0) {
+                    connectionDot.classList.add('active');
+                } else {
+                    connectionDot.classList.remove('active');
+                }
             });
-        });
+        }
         
         // Load video button click handler
         loadVideoBtn.addEventListener('click', () => {
@@ -218,7 +260,9 @@
                 return;
             }
             
-            loadVideo(videoId);
+            // Update URL to shareable link
+            window.history.pushState(null, null, `?v=${videoId}`);
+            loadVideo(videoId, true);
         });
         
         // Control buttons click handlers
@@ -226,10 +270,7 @@
             if (player) {
                 player.playVideo();
                 if (isLeader) {
-                    database.ref('rooms/' + currentRoomId + '/state').update({
-                        isPlaying: true,
-                        lastActionTime: Date.now()
-                    });
+                    updateLeaderState(true);
                 }
             }
         });
@@ -238,82 +279,105 @@
             if (player) {
                 player.pauseVideo();
                 if (isLeader) {
-                    database.ref('rooms/' + currentRoomId + '/state').update({
-                        isPlaying: false,
-                        lastActionTime: Date.now()
-                    });
+                    updateLeaderState(false);
                 }
             }
         });
         
-        syncBtn.addEventListener('click', () => {
+        fullscreenBtn.addEventListener('click', () => {
             if (player) {
-                syncVideo();
+                const iframe = document.querySelector('#player iframe');
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) {
+                    iframe.msRequestFullscreen();
+                }
             }
         });
         
-        // Generate a random room ID
-        function generateRoomId() {
-            return Math.random().toString(36).substring(2, 8);
+        // Update leader state in Firebase
+        function updateLeaderState(isPlaying) {
+            if (!player) return;
+            
+            database.ref(`${appId}/state`).update({
+                isPlaying: isPlaying,
+                currentTime: player.getCurrentTime(),
+                playbackRate: player.getPlaybackRate(),
+                lastActionTime: Date.now()
+            });
         }
         
-        // Join a room
-        function joinRoom(roomId) {
+        // Load a YouTube video
+        function loadVideo(videoId, isLeaderAction) {
             showLoading();
-            currentRoomId = roomId;
-            currentRoomIdSpan.textContent = roomId;
             
-            // Check if room exists
-            database.ref('rooms/' + roomId).once('value').then((snapshot) => {
-                const roomData = snapshot.val();
+            if (isLeaderAction) {
+                // Become the leader
+                isLeader = true;
+                userRoleSpan.textContent = 'Leader';
                 
-                if (roomData) {
-                    // Room exists - join as participant
-                    isLeader = false;
-                    setupDiv.style.display = 'none';
-                    roomDiv.style.display = 'block';
-                    hideLoading();
-                    
-                    if (roomData.videoId) {
-                        loadVideo(roomData.videoId, false);
+                // Initialize state
+                database.ref(`${appId}`).set({
+                    videoId: videoId,
+                    state: {
+                        isPlaying: false,
+                        currentTime: 0,
+                        playbackRate: 1,
+                        lastActionTime: Date.now()
                     }
-                    
-                    // Listen for state changes
-                    setupStateListener();
-                    
-                    showStatus('Joined room as participant');
-                } else {
-                    // Room doesn't exist - create as leader
-                    isLeader = true;
-                    database.ref('rooms/' + roomId).set({
-                        created: Date.now(),
-                        videoId: null,
-                        state: {
-                            isPlaying: false,
-                            currentTime: 0,
-                            playbackRate: 1,
-                            lastActionTime: Date.now()
-                        }
-                    });
-                    
-                    setupDiv.style.display = 'none';
-                    roomDiv.style.display = 'block';
-                    hideLoading();
-                    
-                    // Listen for state changes (leader also listens to detect conflicts)
-                    setupStateListener();
-                    
-                    showStatus('Created new room as leader');
+                });
+                
+                showStatus('You are now the leader. Share this page URL with others.');
+            } else {
+                // Join as participant
+                isLeader = false;
+                userRoleSpan.textContent = 'Participant';
+                showStatus('Connected to leader. Video will sync automatically.');
+            }
+            
+            // Load YouTube player
+            if (!window.YT) {
+                // Load YouTube IFrame API if not already loaded
+                const tag = document.createElement('script');
+                tag.src = "https://www.youtube.com/iframe_api";
+                const firstScriptTag = document.getElementsByTagName('script')[0];
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                
+                window.onYouTubeIframeAPIReady = function() {
+                    createPlayer(videoId);
+                };
+            } else {
+                createPlayer(videoId);
+            }
+            
+            // Set up state listener
+            setupStateListener();
+        }
+        
+        // Create YouTube player
+        function createPlayer(videoId) {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: videoId,
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 1,
+                    'rel': 0,
+                    'enablejsapi': 1
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
                 }
-            }).catch((error) => {
-                hideLoading();
-                showError('Error joining room: ' + error.message);
             });
         }
         
         // Set up listener for state changes
         function setupStateListener() {
-            database.ref('rooms/' + currentRoomId + '/state').on('value', (snapshot) => {
+            database.ref(`${appId}/state`).on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state || !player || ignoreNextStateChange) {
                     ignoreNextStateChange = false;
@@ -340,57 +404,12 @@
             });
         }
         
-        // Load a YouTube video
-        function loadVideo(videoId, isLeaderAction = true) {
-            showLoading();
-            
-            if (isLeaderAction && isLeader) {
-                database.ref('rooms/' + currentRoomId).update({
-                    videoId: videoId
-                });
-            }
-            
-            // Load YouTube player
-            if (!window.YT) {
-                // Load YouTube IFrame API if not already loaded
-                const tag = document.createElement('script');
-                tag.src = "https://www.youtube.com/iframe_api";
-                const firstScriptTag = document.getElementsByTagName('script')[0];
-                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-                
-                window.onYouTubeIframeAPIReady = function() {
-                    createPlayer(videoId);
-                };
-            } else {
-                createPlayer(videoId);
-            }
-        }
-        
-        // Create YouTube player
-        function createPlayer(videoId) {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: videoId,
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 1,
-                    'rel': 0
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-        
         // Player ready handler
         function onPlayerReady(event) {
             hideLoading();
-            showStatus('Video loaded successfully');
             
-            // If we're joining an existing room, sync immediately
             if (!isLeader) {
+                // Sync immediately when joining
                 syncVideo();
             }
         }
@@ -399,16 +418,7 @@
         function onPlayerStateChange(event) {
             // Only leader broadcasts state changes
             if (isLeader && player && event.data !== -1) { // -1 is unstarted
-                const currentTime = player.getCurrentTime();
-                const isPlaying = event.data === YT.PlayerState.PLAYING;
-                const playbackRate = player.getPlaybackRate();
-                
-                database.ref('rooms/' + currentRoomId + '/state').update({
-                    isPlaying: isPlaying,
-                    currentTime: currentTime,
-                    playbackRate: playbackRate,
-                    lastActionTime: Date.now()
-                });
+                updateLeaderState(event.data === YT.PlayerState.PLAYING);
             }
         }
         
@@ -418,7 +428,7 @@
                 showLoading();
                 ignoreNextStateChange = true;
                 
-                database.ref('rooms/' + currentRoomId + '/state').once('value').then((snapshot) => {
+                database.ref(`${appId}/state`).once('value').then((snapshot) => {
                     const state = snapshot.val();
                     if (state) {
                         player.seekTo(state.currentTime, true);
@@ -432,7 +442,6 @@
                         
                         lastSyncedTime = state.lastActionTime;
                         hideLoading();
-                        showStatus('Synced with leader');
                     }
                 }).catch((error) => {
                     hideLoading();
@@ -472,15 +481,8 @@
             loadingIndicator.style.display = 'none';
         }
         
-        // Check for room ID in URL on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const roomId = urlParams.get('room');
-            
-            if (roomId) {
-                roomIdInput.value = roomId;
-            }
-        });
+        // Initialize the app when page loads
+        window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
-  </html>
+</html>
