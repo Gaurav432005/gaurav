@@ -16,7 +16,18 @@
                 <span id="statusText">Connecting...</span>
             </div>
         </header>
-
+<div class="room-connection">
+    <div class="room-actions">
+        <button id="createRoom">Create New Room</button>
+        <span>or</span>
+        <input type="text" id="roomIdInput" placeholder="Enter Room ID">
+        <button id="joinRoom">Join Room</button>
+    </div>
+    <div class="room-info">
+        <p>Room ID: <span id="displayRoomId">Not connected</span></p>
+        <button id="copyRoomLink" class="small-btn">Copy Invite Link</button>
+    </div>
+</div>
         <main>
             <div class="video-container">
                 <div id="youtube-player"></div>
