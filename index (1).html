@@ -979,43 +979,78 @@ const firebaseConfig = {
         });
 
         // Functions
-        function loginUser(username) {
-            currentUser = username;
-            signupModal.classList.remove('active');
-            newsSite.style.display = 'none';
-            chatContainer.style.display = 'flex';
-            
-            // Set partner name
-            chatPartnerName.textContent = username === 'Mahak' ? 'Gaurav' : 'Mahak';
-            
-            // Initialize chat
-            initializeChat();
-        }
+function loginUser(username) {
+    currentUser = username;
+    signupModal.classList.remove('active');
+    newsSite.style.display = 'none';
+    chatContainer.style.display = 'flex';
+
+    const partner = (username === 'Mahak') ? 'Gaurav' : 'Mahak';
+    chatPartnerName.textContent = partner;
+
+    setupPresenceTracking();
+    initializeChat(partner);
+}
 
         function showErrorModal() {
             errorModal.classList.add('active');
         }
+function initializeChat(partner) {
+    const chatId = ['Mahak', 'Gaurav'].sort().join('_');
+    chatRef = database.ref('chats/' + chatId);
+    messagesRef = chatRef.child('messages');
 
-        function initializeChat() {
-            // Create a consistent chat ID regardless of who logs in first
-            const chatId = ['Mahak', 'Gaurav'].sort().join('_');
-            chatRef = database.ref('chats/' + chatId);
-            messagesRef = chatRef.child('messages');
-            
-            // Load existing messages
-            messagesRef.on('child_added', (snapshot) => {
-                const message = snapshot.val();
-                addMessageToChat(message, snapshot.key);
-            });
-            
-            // Handle message removal
-            messagesRef.on('child_removed', (snapshot) => {
-                const messageElement = document.getElementById(`message-${snapshot.key}`);
-                if (messageElement) {
-                    messageElement.remove();
-                }
-            });
+    messagesRef.on('child_added', (snapshot) => {
+        const message = snapshot.val();
+        addMessageToChat(message, snapshot.key);
+    });
+
+    messagesRef.on('child_removed', (snapshot) => {
+        const messageElement = document.getElementById(`message-${snapshot.key}`);
+        if (messageElement) {
+            messageElement.remove();
         }
+    });
+
+    const partnerStatusRef = firebase.database().ref('/status/' + partner);
+    partnerStatusRef.on('value', snapshot => {
+        const status = snapshot.val();
+        const statusEl = document.querySelector('.chat-status');
+        if (status && status.state === 'online') {
+            statusEl.textContent = 'Online';
+        } else {
+            statusEl.textContent = 'Offline';
+        }
+    });
+}
+        
+
+function setupPresenceTracking() {
+    const userStatusDatabaseRef = firebase.database().ref('/status/' + currentUser);
+
+    const isOfflineForDatabase = {
+        state: 'offline',
+        last_changed: firebase.database.ServerValue.TIMESTAMP,
+    };
+
+    const isOnlineForDatabase = {
+        state: 'online',
+        last_changed: firebase.database.ServerValue.TIMESTAMP,
+    };
+
+    const connectedRef = firebase.database().ref('.info/connected');
+    connectedRef.on('value', function(snapshot) {
+        if (snapshot.val() === false) {
+            return;
+        }
+
+        userStatusDatabaseRef.onDisconnect().set(isOfflineForDatabase).then(() => {
+            userStatusDatabaseRef.set(isOnlineForDatabase);
+        });
+    });
+}
+            
+
 
         function addMessageToChat(message, messageId) {
             const isCurrentUser = message.sender === currentUser;
