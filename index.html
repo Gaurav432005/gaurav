@@ -22,7 +22,7 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            min-height: 100vh;
+            
             display: flex;
             justify-content: center;
             align-items: center;
@@ -326,7 +326,7 @@
         .music-control {
             position: absolute;
             top: 20px;
-            right: 20px;
+            bottom: 20px;
             background: white;
             width: 40px;
             height: 40px;
@@ -479,7 +479,7 @@
         <div class="right-section">
             <div class="section-container">
                 <div class="music-control" id="musicControl">
-                    <i class="fas fa-music"></i>
+                    <i class="fas fa-pause"></i>
                 </div>
                 <h1>For My Queen 👑</h1>
                 <div class="love-meter">
@@ -558,7 +558,7 @@
         musicControl.addEventListener('click', () => {
             if (isMusicPlaying) {
                 bgMusic.pause();
-                musicControl.innerHTML = '<i class="fas fa-music"></i>';
+                musicControl.innerHTML = '<i class="fas fa-play"></i>';
             } else {
                 bgMusic.play();
                 musicControl.innerHTML = '<i class="fas fa-pause"></i>';
