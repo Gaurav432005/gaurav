@@ -22,7 +22,6 @@
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            
             display: flex;
             justify-content: center;
             align-items: center;
@@ -32,7 +31,6 @@
             position: relative;
         }
 
-        /* ENHANCED: Main content with divider on desktop */
         .main-content {
             display: flex;
             flex-direction: column;
@@ -66,7 +64,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-           
             justify-content: center;
         }
         @media (min-width: 900px) {
@@ -78,7 +75,6 @@
             }
         }
 
-        /* ENHANCED: Section container with soft border and shadow */
         .section-container {
             background: linear-gradient(135deg, #fff0f3 60%, #ffe0ec 100%);
             border-radius: 28px;
@@ -94,7 +90,6 @@
             height: 80vh;
         }
 
-        /* ENHANCED: Decorative heart above photo */
         .decorative-heart {
             font-size: 2.2rem;
             color: var(--primary);
@@ -106,30 +101,25 @@
             50% { transform: scale(1.15);}
         }
 
-        /* ENHANCED: Polaroid effect with gradient border */
         .polaroid-effect {
             background: white;
             padding: 15px 15px 40px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            /* Removed: transform: rotate(-2deg); */
             transition: box-shadow 0.3s, transform 0.3s;
             margin-bottom: 16px;
         }
         .polaroid-effect:hover {
-            /* Subtle scale and shadow on hover */
             transform: scale(1.03);
             box-shadow: 0 10px 30px rgba(89, 13, 34, 0.18);
         }
 
-        /* ENHANCED: Photo frame with gradient border */
         .photo-frame {
             width: 220px;
             height: 220px;
             border-radius: 22px;
             margin: 0 auto 10px;
             overflow: hidden;
-            border: 5px solid #fff; /* Remove gradient border, use solid white */
-            /* Removed: border-image: linear-gradient(120deg, #ffb3c1 0%, #ff4d6d 100%) 1; */
+            border: 5px solid #fff;
             box-shadow: 0 10px 30px rgba(255, 77, 109, 0.13);
             position: relative;
             background: #fff;
@@ -150,7 +140,6 @@
             transform: scale(1.01);
         }
 
-        /* ENHANCED: Polaroid caption and subtitle */
         .polaroid-caption {
             text-align: center;
             font-family: 'Poppins', sans-serif;
@@ -159,7 +148,6 @@
             font-size: 14px;
         }
 
-        /* ENHANCED: Right section card for meter/message */
         .right-card {
             background: rgba(255,255,255,0.92);
             border-radius: 18px;
@@ -172,7 +160,6 @@
             align-items: center;
         }
 
-        /* ENHANCED: Love meter with glow */
         .love-meter {
             width: 100%;
             height: 10px;
@@ -190,7 +177,6 @@
             transition: width 1s ease;
         }
 
-        /* ENHANCED: Message container with card effect */
         .message-container {
             background: #fff0f3;
             border-radius: 18px;
@@ -223,7 +209,6 @@
             transition: opacity 0.5s cubic-bezier(.77,0,.18,1.01), transform 0.5s cubic-bezier(.77,0,.18,1.01);
         }
 
-        /* ENHANCED: Cheer up button */
         .btn-container {
             display: flex;
             justify-content: center;
@@ -259,24 +244,6 @@
             margin-top: 20px;
             font-weight: 300;
             font-size: 15px;
-        }
-
-        .love-meter {
-            width: 100%;
-            height: 10px;
-            background: var(--light);
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-            box-shadow: inset 0 0 5px rgba(89, 13, 34, 0.2);
-        }
-
-        .love-progress {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--primary), #ff758f);
-            border-radius: 10px;
-            transition: width 1s ease;
         }
 
         .love-text {
@@ -325,11 +292,11 @@
 
         .music-control {
             position: absolute;
-            top: 20px;
-            bottom: 20px;
+            bottom: 24px;
+            right: 24px;
             background: white;
-            width: 40px;
-            height: 40px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -337,33 +304,13 @@
             box-shadow: 0 3px 10px rgba(89, 13, 34, 0.2);
             cursor: pointer;
             z-index: 100;
+            transition: box-shadow 0.2s;
+            border: none;
         }
 
         .music-control i {
             color: var(--primary);
             font-size: 20px;
-        }
-
-        .polaroid-effect {
-            background: white;
-            padding: 15px 15px 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            /* Removed: transform: rotate(-2deg); */
-            transition: box-shadow 0.3s, transform 0.3s;
-            margin-bottom: 16px;
-        }
-        .polaroid-effect:hover {
-            /* Subtle scale and shadow on hover */
-            transform: scale(1.03);
-            box-shadow: 0 10px 30px rgba(89, 13, 34, 0.18);
-        }
-
-        .polaroid-caption {
-            text-align: center;
-            font-family: 'Poppins', sans-serif;
-            color: var(--dark);
-            margin-top: 10px;
-            font-size: 14px;
         }
 
         .confetti {
@@ -384,10 +331,6 @@
                 transform: translateY(1000px) rotate(360deg);
                 opacity: 0;
             }
-        }
-
-        .hidden {
-            display: none;
         }
 
         .special-message {
@@ -478,9 +421,6 @@
         </div>
         <div class="right-section">
             <div class="section-container">
-                <div class="music-control" id="musicControl">
-                    <i class="fas fa-pause"></i>
-                </div>
                 <h1>For My Queen 👑</h1>
                 <div class="love-meter">
                     <div class="love-progress" id="loveProgress"></div>
@@ -497,6 +437,9 @@
                     </button>
                 </div>
                 <p class="apology">I know I messed up, but I promise to do better. You mean everything to me.</p>
+                <button class="music-control" id="musicControl">
+                    <i class="fas fa-play"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -510,10 +453,9 @@
         <h2 style="color:var(--primary);font-size:2.2rem;">Thank You, My Love! ❤️</h2>
         <p style="color:var(--dark);font-size:1.2rem;">You mean the world to me.<br>Have a wonderful day, beautiful!<br><span style="font-size:2rem;">🥰</span></p>
         <div id="closingHearts" style="margin-top:30px;"></div>
-        </div>
+    </div>
     <audio id="bgMusic" loop>
         <source src="1.mp3" type="audio/mpeg">
-        <!-- Replace with your preferred romantic music -->
     </audio>
     <script>
         // Messages data (single array, 10 messages only)
@@ -531,9 +473,6 @@
         ];
         
         // DOM elements
-        const complimentBtn = document.getElementById('complimentBtn');
-        const romanticBtn = document.getElementById('romanticBtn');
-        const specialBtn = document.getElementById('specialBtn');
         const messageEl = document.getElementById('message');
         const heartsContainer = document.getElementById('hearts');
         const photo = document.getElementById('gfPhoto');
@@ -545,12 +484,15 @@
         const closeSpecial = document.getElementById('closeSpecial');
         const closingPage = document.getElementById('closingPage');
         const closingHearts = document.getElementById('closingHearts');
+        const cheerBtn = document.getElementById('cheerBtn');
         
         // State
         let loveLevel = 0;
         let isMusicPlaying = false;
         
-        // Initialize
+        // Initialize - music starts paused with play icon
+        bgMusic.pause();
+        musicControl.innerHTML = '<i class="fas fa-play"></i>';
         createHearts(10);
         updateLoveMeter();
         
@@ -574,7 +516,6 @@
         });
         
         // Cheer up button event listener
-        const cheerBtn = document.getElementById('cheerBtn');
         cheerBtn.addEventListener('click', () => {
             const randomMessage = messages[Math.floor(Math.random() * messages.length)];
             animateMessageChange(randomMessage);
@@ -582,6 +523,7 @@
             createConfetti(20);
             increaseLove(15);
         });
+        
         // Closing/Thank You Page logic
         closeSpecial.addEventListener('click', () => {
             specialMessage.classList.remove('show');
@@ -597,14 +539,6 @@
                     closingHearts.appendChild(heart);
                 }, i * 60);
             }
-            // Do NOT fade out or hide the closing page, just keep it visible
-            // setTimeout(() => {
-            //     window.close();
-            //     closingPage.style.opacity = '0';
-            //     setTimeout(() => {
-            //         closingPage.style.display = 'none';
-            //     }, 1000);
-            // }, 2500);
             setTimeout(() => {
                 window.close();
             }, 2500);
@@ -733,13 +667,6 @@
         function showSpecialMessage() {
             specialMessage.classList.add('show');
         }
-        
-        // Auto message rotation
-        // setInterval(() => {
-        //     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-        //     animateMessageChange(randomMessage);
-        //     createHearts(3);
-        // }, 15000);
         
         // Initial confetti
         setTimeout(() => {
