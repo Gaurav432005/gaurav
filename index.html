@@ -9,83 +9,127 @@
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      background: linear-gradient(135deg, #ffe0ec, #ffc3a0);
       font-family: 'Poppins', sans-serif;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
     }
 
     .player-container {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border-radius: 25px;
+      padding: 40px 50px;
       text-align: center;
-      background: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      max-width: 400px;
     }
 
     h1 {
       font-family: 'Pacifico', cursive;
-      color: #ff6f61;
-      margin-bottom: 20px;
+      font-size: 28px;
+      color: #d6336c;
+      margin-bottom: 30px;
     }
 
-    .icons {
+    .button-row {
       display: flex;
       justify-content: center;
-      gap: 40px;
-      margin-top: 20px;
+      gap: 50px;
     }
 
-    .icons i {
-      font-size: 40px;
-      color: #ff6f61;
+    .music-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #fff;
+      color: #d6336c;
+      border: none;
+      font-size: 26px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15);
       cursor: pointer;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s ease, background 0.3s;
     }
 
-    .icons i:hover {
-      transform: scale(1.2);
+    .music-btn:hover {
+      transform: scale(1.1);
+      background: #fce5ec;
     }
 
     .footer {
       margin-top: 30px;
       font-size: 14px;
-      color: #888;
+      color: #444;
     }
   </style>
 </head>
 <body>
 
   <div class="player-container">
-    <h1>For My Favorite Person</h1>
-    <div class="icons">
-      <i class="fas fa-music" onclick="playSong('1.mp3')"></i>
-      <i class="fas fa-heart" onclick="playSong('2.mp3')"></i>
-      <i class="fas fa-star" onclick="playSong('3.mp3')"></i>
+    <h1>Just for You</h1>
+    <div class="button-row">
+      <button class="music-btn" id="btn2"><i class="fas fa-play"></i></button>
+      <button class="music-btn" id="btn3"><i class="fas fa-play"></i></button>
     </div>
-    <div class="footer">Click an icon to play a song</div>
+    <div class="footer">Click to play a song. You're amazing.</div>
   </div>
 
-  <audio id="audioPlayer" controls style="display:none;"></audio>
+  <audio id="audio2" src="2.mp3"></audio>
+  <audio id="audio3" src="3.mp3"></audio>
 
   <script>
-    const audio = document.getElementById('audioPlayer');
+    const audio2 = document.getElementById("audio2");
+    const audio3 = document.getElementById("audio3");
+    const btn2 = document.getElementById("btn2");
+    const btn3 = document.getElementById("btn3");
 
-    function playSong(file) {
-      if (audio.src.includes(file)) {
-        if (audio.paused) {
-          audio.play();
-        } else {
-          audio.pause();
-        }
-      } else {
-        audio.pause();
-        audio.src = file;
-        audio.play();
-      }
+    let timeoutId;
+
+    function resetButtons() {
+      btn2.innerHTML = '<i class="fas fa-play"></i>';
+      btn3.innerHTML = '<i class="fas fa-play"></i>';
     }
+
+    function stopAllAudio() {
+      audio2.pause();
+      audio2.currentTime = 0;
+      audio3.pause();
+      audio3.currentTime = 0;
+      clearTimeout(timeoutId);
+    }
+
+    btn2.addEventListener("click", () => {
+      if (!audio2.paused) {
+        stopAllAudio();
+        resetButtons();
+      } else {
+        stopAllAudio();
+        audio2.play();
+        resetButtons();
+        btn2.innerHTML = '<i class="fas fa-pause"></i>';
+        timeoutId = setTimeout(() => {
+          audio2.pause();
+          audio2.currentTime = 0;
+          btn2.innerHTML = '<i class="fas fa-play"></i>';
+        }, 44000); // 44 seconds
+      }
+    });
+
+    btn3.addEventListener("click", () => {
+      if (!audio3.paused) {
+        stopAllAudio();
+        resetButtons();
+      } else {
+        stopAllAudio();
+        audio3.play();
+        resetButtons();
+        btn3.innerHTML = '<i class="fas fa-pause"></i>';
+      }
+    });
+
+    audio3.addEventListener("ended", resetButtons);
   </script>
 
 </body>
