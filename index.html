@@ -85,8 +85,6 @@
     const btn2 = document.getElementById("btn2");
     const btn3 = document.getElementById("btn3");
 
-    let timeoutId;
-
     function resetButtons() {
       btn2.innerHTML = '<i class="fas fa-play"></i>';
       btn3.innerHTML = '<i class="fas fa-play"></i>';
@@ -97,7 +95,6 @@
       audio2.currentTime = 0;
       audio3.pause();
       audio3.currentTime = 0;
-      clearTimeout(timeoutId);
     }
 
     btn2.addEventListener("click", () => {
@@ -109,11 +106,6 @@
         audio2.play();
         resetButtons();
         btn2.innerHTML = '<i class="fas fa-pause"></i>';
-        timeoutId = setTimeout(() => {
-          audio2.pause();
-          audio2.currentTime = 0;
-          btn2.innerHTML = '<i class="fas fa-play"></i>';
-        }, 59000); // 44 seconds
       }
     });
 
@@ -129,6 +121,8 @@
       }
     });
 
+    // Handle automatic reset of button icons when audio ends
+    audio2.addEventListener("ended", resetButtons);
     audio3.addEventListener("ended", resetButtons);
   </script>
 
