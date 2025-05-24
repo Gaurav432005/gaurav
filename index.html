@@ -1,683 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For My Queen 👑</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #ff4d6d;
-            --secondary: #ff8fa3;
-            --dark: #590d22;
-            --light: #fff0f3;
-        }
+  <meta charset="UTF-8">
+  <title>For You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .player-container {
+      text-align: center;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            color: var(--dark);
-            overflow: hidden;
-            position: relative;
-            min-height: 100vh;
-        }
+    h1 {
+      font-family: 'Pacifico', cursive;
+      color: #ff6f61;
+      margin-bottom: 20px;
+    }
 
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-            width: 100%;
-            max-width: 950px;
-            z-index: 10;
-            position: relative;
-        }
-        @media (min-width: 900px) {
-            .main-content {
-                flex-direction: row;
-                align-items: stretch;
-                gap: 0;
-            }
-            .main-content::before {
-                content: "";
-                position: absolute;
-                left: 50%;
-                top: 7%;
-                bottom: 7%;
-                width: 2px;
-                background: linear-gradient(180deg, #ffb3c1 0%, #fff0f3 100%);
-                z-index: 2;
-                border-radius: 2px;
-                opacity: 0.5;
-            }
-        }
-        .left-section, .right-section {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        @media (min-width: 900px) {
-            .left-section, .right-section {
-                width: 50%;
-                min-height: 600px;
-                height: 600px;
-                padding: 0 24px;
-            }
-        }
+    .icons {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
 
-        .section-container {
-            background: linear-gradient(135deg, #fff0f3 60%, #ffe0ec 100%);
-            border-radius: 28px;
-            padding: 48px 28px 40px 28px;
-            box-shadow: 0 8px 32px rgba(255, 77, 109, 0.10), 0 1.5px 8px rgba(89, 13, 34, 0.07);
-            max-width: 410px;
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            height: 80vh;
-        }
+    .icons i {
+      font-size: 40px;
+      color: #ff6f61;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
 
-        .decorative-heart {
-            font-size: 2.2rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { transform: scale(1);}
-            50% { transform: scale(1.15);}
-        }
+    .icons i:hover {
+      transform: scale(1.2);
+    }
 
-        .polaroid-effect {
-            background: white;
-            padding: 15px 15px 40px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s, transform 0.3s;
-            margin-bottom: 16px;
-        }
-        .polaroid-effect:hover {
-            transform: scale(1.03);
-            box-shadow: 0 10px 30px rgba(89, 13, 34, 0.18);
-        }
-
-        .photo-frame {
-            width: 220px;
-            height: 220px;
-            border-radius: 22px;
-            margin: 0 auto 10px;
-            overflow: hidden;
-            border: 5px solid #fff;
-            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.13);
-            position: relative;
-            background: #fff;
-            transition: box-shadow 0.3s, transform 0.3s;
-        }
-        .photo-frame img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-            display: block;
-        }
-        .photo-frame:hover {
-            transform: scale(1.015);
-            box-shadow: 0 12px 32px rgba(255, 77, 109, 0.15);
-        }
-        .photo-frame:hover img {
-            transform: scale(1.01);
-        }
-
-        .polaroid-caption {
-            text-align: center;
-            font-family: 'Poppins', sans-serif;
-            color: var(--dark);
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .right-card {
-            background: rgba(255,255,255,0.92);
-            border-radius: 18px;
-            box-shadow: 0 2px 12px rgba(255, 77, 109, 0.07);
-            padding: 28px 18px 18px 18px;
-            width: 100%;
-            margin-bottom: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .love-meter {
-            width: 100%;
-            height: 10px;
-            background: var(--light);
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-            box-shadow: inset 0 0 5px rgba(89, 13, 34, 0.2);
-        }
-        .love-progress {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, var(--primary), #ff758f);
-            border-radius: 10px;
-            transition: width 1s ease;
-        }
-
-        .message-container {
-            background: #fff0f3;
-            border-radius: 18px;
-            padding: 28px 18px;
-            margin: 18px 0 10px 0;
-            min-height: 100px;
-            max-height: 110px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: 0 4px 24px rgba(255, 77, 109, 0.18), 0 1.5px 8px rgba(255, 77, 109, 0.10);
-            width: 100%;
-            max-width: 370px;
-            overflow: hidden;
-            border: 2.5px solid var(--primary);
-            animation: message-glow 2s infinite alternate;
-        }
-        @keyframes message-glow {
-            0% { box-shadow: 0 0 12px 2px var(--primary), 0 4px 24px rgba(255, 77, 109, 0.18); }
-            100% { box-shadow: 0 0 24px 6px var(--secondary), 0 4px 24px rgba(255, 77, 109, 0.18); }
-        }
-        .message {
-            font-size: 16px;
-            line-height: 1.5;
-            font-weight: 600;
-            color: var(--primary);
-            text-shadow: 0 2px 8px #fff0f3, 0 1px 0 #fff;
-            letter-spacing: 0.01em;
-            transition: opacity 0.5s cubic-bezier(.77,0,.18,1.01), transform 0.5s cubic-bezier(.77,0,.18,1.01);
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 18px 0 0 0;
-        }
-        .btn {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 13px 32px;
-            border-radius: 50px;
-            font-size: 17px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 500;
-            box-shadow: 0 5px 15px rgba(255, 77, 109, 0.18);
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.01em;
-        }
-        .btn:hover {
-            background: var(--dark);
-            transform: translateY(-2px) scale(1.04);
-            box-shadow: 0 8px 20px rgba(89, 13, 34, 0.18);
-        }
-
-        .apology {
-            font-style: italic;
-            color: var(--dark);
-            margin-top: 20px;
-            font-weight: 300;
-            font-size: 15px;
-        }
-
-        .love-text {
-            font-size: 14px;
-            color: var(--dark);
-            margin-top: 5px;
-            font-weight: 500;
-        }
-
-        .floating-hearts {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .heart {
-            position: absolute;
-            font-size: 24px;
-            color: var(--primary);
-            opacity: 0;
-            animation: float 6s ease-in infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(0) rotate(0deg) scale(0);
-                opacity: 0;
-                color: var(--primary);
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-300px) rotate(360deg) scale(1.5);
-                opacity: 0;
-                color: #ff758f;
-            }
-        }
-
-        .music-control {
-            position: absolute;
-            bottom: 24px;
-            right: 24px;
-            background: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 3px 10px rgba(89, 13, 34, 0.2);
-            cursor: pointer;
-            z-index: 100;
-            transition: box-shadow 0.2s;
-            border: none;
-        }
-
-        .music-control i {
-            color: var(--primary);
-            font-size: 20px;
-        }
-
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: var(--primary);
-            opacity: 0;
-            z-index: 1;
-        }
-
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-100px) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(1000px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-
-        .special-message {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(89, 13, 34, 0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
-        }
-
-        .special-message.show {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .special-message h2 {
-            font-size: 32px;
-            margin-bottom: 20px;
-            color: white;
-        }
-
-        .special-message p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            max-width: 500px;
-        }
-
-        .close-special {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-size: 16px;
-            cursor: pointer;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-        }
-
-        .floating-text {
-            position: absolute;
-            font-size: 16px;
-            color: var(--primary);
-            font-weight: 600;
-            opacity: 0;
-            animation: float-up 3s ease-in-out forwards;
-        }
-
-        @keyframes float-up {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    .footer {
+      margin-top: 30px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-    <div class="floating-hearts" id="hearts"></div>
-    <div class="main-content">
-        <div class="left-section">
-            <div class="section-container">
-                <div class="decorative-heart">❤️</div>
-                <div class="polaroid-effect">
-                    <div class="photo-frame">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV56qGzHF-QOVSkynv_La7-dlFOTNvuUCaGA&s" alt="My Beautiful Girlfriend" id="gfPhoto">
-                    </div>
-                    <div class="polaroid-caption">My Favorite Person</div>
-                    <div class="polaroid-subtitle" style="color:var(--secondary);font-size:13px;margin-top:4px;font-style:italic;">You light up my world</div>
-                </div>
-            </div>
-        </div>
-        <div class="right-section">
-            <div class="section-container">
-                <h1>For My Queen 👑</h1>
-                <div class="love-meter">
-                    <div class="love-progress" id="loveProgress"></div>
-                </div>
-                <div class="love-text" id="loveText">Mood Meter: Not Happy 😔</div>
-                <div class="message-container">
-                    <div class="message" id="message">
-                        This is for you my sweetheart ❣️ </br> plzz abb to maaf krdoo 🥲🥲
-                </div></div>
-                <div class="btn-container">
-                    <button class="btn" id="cheerBtn">
-                        <i class="fas fa-heart"></i> Make You Fall For Me
-                    </button>
-                </div>
-                <p class="apology">I know I messed up, but I promise to do better. You mean everything to me.</p>
-                <button class="music-control" id="musicControl">
-                    <i class="fas fa-play"></i>
-                </button>
-                <button class="music-control" id="musicControl">
-                    <i class="fas fa-play"></i>
-                </button>
-                <button class="music-control" id="musicControl">
-                    <i class="fas fa-play"></i>
-                </button>
-            </div>
-        </div>
+
+  <div class="player-container">
+    <h1>For My Favorite Person</h1>
+    <div class="icons">
+      <i class="fas fa-music" onclick="playSong('1.mp3')"></i>
+      <i class="fas fa-heart" onclick="playSong('2.mp3')"></i>
+      <i class="fas fa-star" onclick="playSong('3.mp3')"></i>
     </div>
-    <div class="special-message" id="specialMessage">
-        <h2>To The Love Of My Life</h2>
-        <p>I know I'm not perfect, but I'm perfectly yours. Every moment without your smile feels incomplete. I promise to cherish you and make you happy every day. Will you forgive me?</p>
-        <button class="close-special" id="closeSpecial">I Love You ❤️</button>
-    </div>
-    <!-- Closing/Thank You Page -->
-    <div class="special-message" id="closingPage" style="background:rgba(255,255,255,0.98);color:var(--primary);display:none;">
-        <h2 style="color:var(--primary);font-size:2.2rem;">Thank You, My Love! ❤️</h2>
-        <p style="color:var(--dark);font-size:1.2rem;">You mean the world to me.<br>Have a wonderful day, beautiful!<br><span style="font-size:2rem;">🥰</span></p>
-        <div id="closingHearts" style="margin-top:30px;"></div>
-    </div>
-    <audio id="bgMusic" loop>
-        <source src="videoplayback.m4a" type="audio/mpeg">
-    </audio>
-    <script>
-        // Messages data (single array, 10 messages only)
-        const messages = [
-  "I’m really sorry yaar... maine socha nahi tha meri baat tujhe itna hurt karegi.",
-  "Dil se maafi chahta hoon, tu important hai mujhe... galti meri thi, 100%.",
-  "Mujhe maaf kar de please... main har pal sirf tujhse baat karne ka wait kar raha hoon.",
-  "Har kisi se galti hoti hai, but main bas tujhse ek mauka maang raha hoon... I’m truly sorry.",
-  "Mujhe realize hua ke maine tujhe kitna hurt kiya... I wish main time reverse kar sakta.",
-  "Sorry kehna easy lagta hai, par jo feeling hai na, woh sach mein dil se hai.",
-  "Tu roothi hai, aur main sirf tujhse hi juda hoon... please forgive me.",
-  "Agar meri baat ne tujhe pain diya, toh mujhe usse zyada pain ho raha hai... I’m sorry meri jaan.",
-  "Main bas chahta hoon tu ek baar meri taraf dekhe aur kahe – theek hai, maaf kiya.",
-  "Zindagi short hai, aur main tujhe gusse mein nahi, pyaar mein dekhna chahta hoon... sorry baby."
-];
-        
-        // DOM elements
-        const messageEl = document.getElementById('message');
-        const heartsContainer = document.getElementById('hearts');
-        const photo = document.getElementById('gfPhoto');
-        const loveProgress = document.getElementById('loveProgress');
-        const loveText = document.getElementById('loveText');
-        const musicControl = document.getElementById('musicControl');
-        const bgMusic = document.getElementById('bgMusic');
-        const specialMessage = document.getElementById('specialMessage');
-        const closeSpecial = document.getElementById('closeSpecial');
-        const closingPage = document.getElementById('closingPage');
-        const closingHearts = document.getElementById('closingHearts');
-        const cheerBtn = document.getElementById('cheerBtn');
-        
-        // State
-        let loveLevel = 0;
-        let isMusicPlaying = false;
-        
-        // Initialize - music starts paused with play icon
-        bgMusic.pause();
-        musicControl.innerHTML = '<i class="fas fa-play"></i>';
-        createHearts(10);
-        updateLoveMeter();
-        
-        // Music control
-        musicControl.addEventListener('click', () => {
-            if (isMusicPlaying) {
-                bgMusic.pause();
-                musicControl.innerHTML = '<i class="fas fa-play"></i>';
-            } else {
-                bgMusic.play();
-                musicControl.innerHTML = '<i class="fas fa-pause"></i>';
-            }
-            isMusicPlaying = !isMusicPlaying;
-        });
-        
-        // Photo interaction
-        photo.addEventListener('click', () => {
-            createHearts(15);
-            createFloatingText("So Beautiful!", photo);
-            increaseLove(5);
-        });
-        
-        // Cheer up button event listener
-        cheerBtn.addEventListener('click', () => {
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            animateMessageChange(randomMessage);
-            createHearts(10);
-            createConfetti(20);
-            increaseLove(15);
-        });
-        
-        // Closing/Thank You Page logic
-        closeSpecial.addEventListener('click', () => {
-            specialMessage.classList.remove('show');
-            closingPage.style.display = 'flex';
-            closingPage.style.opacity = '1';
-            for (let i = 0; i < 30; i++) {
-                setTimeout(() => {
-                    const heart = document.createElement('span');
-                    heart.textContent = '❤️';
-                    heart.style.fontSize = `${Math.random() * 18 + 18}px`;
-                    heart.style.margin = '2px';
-                    heart.style.opacity = Math.random() * 0.5 + 0.5;
-                    closingHearts.appendChild(heart);
-                }, i * 60);
-            }
-            setTimeout(() => {
-                window.close();
-            }, 2500);
-        });
-        
-        // Animation functions
-        function animateMessageChange(newMessage) {
-            messageEl.style.opacity = 0;
-            messageEl.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                messageEl.textContent = newMessage;
-                messageEl.style.opacity = 1;
-                messageEl.style.transform = 'translateY(0)';
-            }, 300);
-        }
-        
-        function createHearts(count) {
-            for (let i = 0; i < count; i++) {
-                setTimeout(() => {
-                    const heart = document.createElement('div');
-                    heart.innerHTML = ['❤', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤', '🤍'][Math.floor(Math.random() * 9)];
-                    heart.classList.add('heart');
-                    
-                    const leftPos = Math.random() * 100;
-                    const delay = Math.random() * 3;
-                    const size = Math.random() * 20 + 10;
-                    const duration = Math.random() * 3 + 3;
-                    
-                    heart.style.left = `${leftPos}%`;
-                    heart.style.bottom = '-20px';
-                    heart.style.animationDelay = `${delay}s`;
-                    heart.style.fontSize = `${size}px`;
-                    heart.style.animationDuration = `${duration}s`;
-                    
-                    heartsContainer.appendChild(heart);
-                    
-                    setTimeout(() => {
-                        heart.remove();
-                    }, duration * 1000);
-                }, i * 100);
-            }
-        }
-        
-        function createConfetti(count) {
-            const colors = ['#ff4d6d', '#ff8fa3', '#ffb3c1', '#ffccd5', '#fff0f3'];
-            
-            for (let i = 0; i < count; i++) {
-                const confetti = document.createElement('div');
-                confetti.classList.add('confetti');
-                
-                const size = Math.random() * 10 + 5;
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const leftPos = Math.random() * window.innerWidth;
-                const animationDuration = Math.random() * 3 + 2;
-                const delay = Math.random() * 2;
-                
-                confetti.style.width = `${size}px`;
-                confetti.style.height = `${size}px`;
-                confetti.style.backgroundColor = color;
-                confetti.style.left = `${leftPos}px`;
-                confetti.style.top = '0';
-                confetti.style.animationDuration = `${animationDuration}s`;
-                confetti.style.animationDelay = `${delay}s`;
-                
-                document.body.appendChild(confetti);
-                
-                setTimeout(() => {
-                    confetti.style.animationName = 'confetti-fall';
-                }, 10);
-                
-                setTimeout(() => {
-                    confetti.remove();
-                }, (animationDuration + delay) * 1000);
-            }
-        }
-        
-        function createFloatingText(text, element) {
-            const rect = element.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
-            
-            const floatingText = document.createElement('div');
-            floatingText.classList.add('floating-text');
-            floatingText.textContent = text;
-            floatingText.style.left = `${x}px`;
-            floatingText.style.top = `${y}px`;
-            
-            document.body.appendChild(floatingText);
-            
-            setTimeout(() => {
-                floatingText.remove();
-            }, 3000);
-        }
-        
-        // Love meter functions
-        function increaseLove(amount) {
-            loveLevel = Math.min(loveLevel + amount, 100);
-            updateLoveMeter();
-            
-            if (loveLevel >= 100) {
-                showSpecialMessage();
-                createHearts(100);
-                createConfetti(200);
-            }
-        }
-        
-        function updateLoveMeter() {
-            loveProgress.style.width = `${loveLevel}%`;
-            
-            if (loveLevel < 20) {
-                loveText.textContent = "Mood Meter: Still Angry 😠";
-            } else if (loveLevel < 40) {
-                loveText.textContent = "Mood Meter: A Little Better 😐";
-            } else if (loveLevel < 60) {
-                loveText.textContent = "Mood Meter: Softening Up 🙂";
-            } else if (loveLevel < 80) {
-                loveText.textContent = "Mood Meter: Almost Happy 😊";
-            } else if (loveLevel < 100) {
-                loveText.textContent = "Mood Meter: Very Happy 😍";
-            } else {
-                loveText.textContent = "Mood Meter: Completely In Love With You 🥰";
-            }
-        }
-        
-        function showSpecialMessage() {
-            specialMessage.classList.add('show');
-        }
-        
-        // Initial confetti
-        setTimeout(() => {
-            createConfetti(50);
-        }, 1000);
-    </script>
+    <div class="footer">Click an icon to play a song</div>
+  </div>
+
+  <audio id="audioPlayer"></audio>
+
+  <script>
+    const audio = document.getElementById('audioPlayer');
+
+    function playSong(file) {
+      if (audio.src.includes(file) && !audio.paused) {
+        audio.pause();
+      } else {
+        audio.src = file;
+        audio.play();
+      }
+    }
+  </script>
+
 </body>
 </html>
