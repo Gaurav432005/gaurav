@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>For You</title>
   <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     body {
       margin: 0;
@@ -68,15 +68,20 @@
     <div class="footer">Click an icon to play a song</div>
   </div>
 
-  <audio id="audioPlayer"></audio>
+  <audio id="audioPlayer" controls style="display:none;"></audio>
 
   <script>
     const audio = document.getElementById('audioPlayer');
 
     function playSong(file) {
-      if (audio.src.includes(file) && !audio.paused) {
-        audio.pause();
+      if (audio.src.includes(file)) {
+        if (audio.paused) {
+          audio.play();
+        } else {
+          audio.pause();
+        }
       } else {
+        audio.pause();
         audio.src = file;
         audio.play();
       }
